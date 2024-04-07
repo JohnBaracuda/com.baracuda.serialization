@@ -1,0 +1,25 @@
+{
+  "name": "com.baracuda.serialization",
+  "version": "1.0.0",
+  "displayName": "Serialization",
+  "description": "Profile based multi platform serialization and savegame system.",
+  "unity": "2023.2",
+  "documentationUrl": "https://github.com/JohnBaracuda/com.baracuda.serializationm",
+  "changelogUrl": "https://github.com/JohnBaracuda/com.baracuda.serialization/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/JohnBaracuda/com.baracuda.serialization/blob/main/LICENSE.md",
+  "keywords": [
+    "savegame",
+    "serialization",
+    "persistent data"
+  ],
+  "author": {
+    "name": "John Baracuda",
+    "email": "johnbaracudagames@gmail.com",
+    "url": "https://github.com/JohnBaracuda"
+  },
+  "type": "tool",
+  "dependencies": {
+    "com.cysharp.unitask": "2.3.3",
+    "com.baracuda.utilities": "1.0.0"
+  }
+}

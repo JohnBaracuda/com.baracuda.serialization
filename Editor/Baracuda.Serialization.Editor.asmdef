@@ -1,0 +1,21 @@
+{
+    "name": "Baracuda.Serialization.Editor",
+    "rootNamespace": "Baracuda.Serialization",
+    "references": [
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:8210c1b9ce26abb449d76e69f5ce90d2",
+        "GUID:b36315b18db27a54aa4a0451d8b88701",
+        "GUID:ebf14bd9950c0cb429d7280a2c7ab8fe"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
