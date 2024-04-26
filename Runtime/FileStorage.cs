@@ -210,7 +210,7 @@ namespace Baracuda.Serialization
 
                 Debug.Log("IO", $"Start Writing Async {filePath}");
                 await _fileOperations.WriteAllBytesAsync(filePath, bytes, writeCancellationSource.Token)
-                    .TimeoutAsync(TimeSpan.FromSeconds(5));
+                    .TimeoutAsync(5000);
                 Debug.Log("IO", $"Stop Writing Async {filePath}");
 
                 isWritingAsync = false;
