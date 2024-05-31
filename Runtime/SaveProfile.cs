@@ -56,11 +56,15 @@ namespace Baracuda.Serialization
                 saveData = save as SaveData<T>;
                 if (saveData is not null)
                 {
-                    saveData.data = value;
+                    saveData.value = value;
                     saveData.lastSaveTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture);
                 }
                 else
                 {
+                    saveData = new SaveData<T>
+                    {
+                        value = value
+                    };
                     Debug.LogWarning("Save Profile", $"{fileName} was previously saved with a different type!");
                 }
             }
@@ -68,7 +72,7 @@ namespace Baracuda.Serialization
             {
                 saveData = new SaveData<T>
                 {
-                    data = value,
+                    value = value,
                     fileName = fileName,
                     createdTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture),
                     lastSaveTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture),
@@ -106,7 +110,7 @@ namespace Baracuda.Serialization
                 saveData = save as SaveData<T>;
                 if (saveData is not null)
                 {
-                    saveData.data = value;
+                    saveData.value = value;
                     saveData.lastSaveTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture);
                 }
                 else
@@ -118,7 +122,7 @@ namespace Baracuda.Serialization
             {
                 saveData = new SaveData<T>
                 {
-                    data = value,
+                    value = value,
                     fileName = fileName,
                     lastSaveTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture),
                     createdTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture),
@@ -158,13 +162,13 @@ namespace Baracuda.Serialization
                 var saveData = data.Read<SaveData<T>>();
                 _loadedSaveDataCache.Add(fileName, saveData);
                 _loadedFileDataCache.Remove(fileName);
-                var value = saveData.data;
+                var value = saveData.value;
                 return value;
             }
 
             if (_loadedSaveDataCache.TryGetValue(fileName, out var file))
             {
-                var value = file is SaveData<T> save ? save.data : default(T);
+                var value = file is SaveData<T> save ? save.value : default(T);
                 return value;
             }
 
@@ -182,7 +186,7 @@ namespace Baracuda.Serialization
                 {
                     _loadedSaveDataCache.AddOrUpdate(fileName, saveData);
                     _loadedFileDataCache.Remove(fileName);
-                    value = saveData.data;
+                    value = saveData.value;
                     return true;
                 }
             }
@@ -191,7 +195,7 @@ namespace Baracuda.Serialization
             {
                 if (file is SaveData<T> save)
                 {
-                    value = save.data;
+                    value = save.value;
                     return true;
                 }
             }

@@ -41,8 +41,8 @@ namespace Baracuda.Serialization
 
         /// <summary>
         ///     The persistent shared <see cref="Serialization.Profile" />.
-        ///     This profile contains non profile specific persistent data
-        ///     and can be used to store data that is non profile specific.
+        ///     This profile contains non profile specific persistent value
+        ///     and can be used to store value that is non profile specific.
         /// </summary>
         /// <exception cref="FileSystemNotInitializedException"></exception>
         [PublicAPI]
@@ -114,7 +114,7 @@ namespace Baracuda.Serialization
         public static event Action ShutdownCompleted;
 
         /// <summary>
-        ///     Validator to check the integrity of files, data & paths.
+        ///     Validator to check the integrity of files, value & paths.
         /// </summary>
         /// <exception cref="FileSystemNotInitializedException"></exception>
         [PublicAPI]

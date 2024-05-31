@@ -17,6 +17,6 @@ namespace Baracuda.Serialization
     [Serializable]
     internal sealed class SaveData<T> : SaveData
     {
-        public T data;
+        public T value;
     }
 }

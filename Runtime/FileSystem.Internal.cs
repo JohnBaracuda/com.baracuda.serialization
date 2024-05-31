@@ -607,6 +607,7 @@ namespace Baracuda.Serialization
             }
             if (profile == activeProfile)
             {
+                Debug.Log(Log, $"Cannot delete active profile {profile.DisplayName}");
                 return;
             }
 

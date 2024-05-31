@@ -76,7 +76,7 @@ namespace Baracuda.Serialization
                 }
 
                 var data = PlayerPrefs.GetString(path);
-                Debug.Log("IO", $"Loading data from path {path}");
+                Debug.Log("IO", $"Loading value from path {path}");
 
                 var file = Json.FromJson<T>(data);
                 return FileData<T>.FromSuccess(file);
@@ -101,7 +101,7 @@ namespace Baracuda.Serialization
                 type ??= typeof(object);
                 var data = PlayerPrefs.GetString(path);
                 var file = Json.FromJson(data, type);
-                Debug.Log("IO", $"Loading data from path {path}");
+                Debug.Log("IO", $"Loading value from path {path}");
 
                 return FileData<object>.FromSuccess(file);
             }
@@ -123,7 +123,7 @@ namespace Baracuda.Serialization
                 }
 
                 var data = PlayerPrefs.GetString(path);
-                Debug.Log("IO", $"Loading data from path {path}");
+                Debug.Log("IO", $"Loading value from path {path}");
 
                 return FileData.FromSuccess(data);
             }
@@ -141,7 +141,7 @@ namespace Baracuda.Serialization
                 var data = Json.ToJson(file);
 
                 PlayerPrefs.SetString(path, data);
-                Debug.Log("IO", $"Saving data to path {path}");
+                Debug.Log("IO", $"Saving value to path {path}");
 
                 return SaveResult.FromSuccess();
             }
@@ -160,7 +160,7 @@ namespace Baracuda.Serialization
                 var data = Json.ToJson(file);
 
                 PlayerPrefs.SetString(path, data);
-                Debug.Log("IO", $"Saving data to path {path}");
+                Debug.Log("IO", $"Saving value to path {path}");
 
                 return SaveResult.FromSuccess();
             }
@@ -178,7 +178,7 @@ namespace Baracuda.Serialization
                 var path = Path.Combine(_root, key);
 
                 PlayerPrefs.SetString(path, data);
-                Debug.Log("IO", $"Saving data to path {path}");
+                Debug.Log("IO", $"Saving value to path {path}");
 
                 return SaveResult.FromSuccess();
             }

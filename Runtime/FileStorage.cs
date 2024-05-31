@@ -1,5 +1,5 @@
 ﻿using Baracuda.Utilities;
-using Baracuda.Utilities.Types;
+using Baracuda.Utilities.Collections;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
@@ -14,6 +14,9 @@ namespace Baracuda.Serialization
     public partial class FileStorage : IFileStorage
     {
         #region Fields
+
+        // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
+        public string DataPath => _dataPath;
 
         private string _dataPath;
         private string _encryptionKey;

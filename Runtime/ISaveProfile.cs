@@ -28,7 +28,7 @@
         public bool TryLoadFile<T>(string fileName, out T value, StoreOptions options = default);
 
         /// <summary>
-        ///     Returns true if the profile has data for the file;
+        ///     Returns true if the profile has value for the file;
         /// </summary>
         public bool HasFile(string fileName);
 

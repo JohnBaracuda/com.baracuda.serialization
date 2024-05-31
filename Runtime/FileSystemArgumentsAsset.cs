@@ -9,7 +9,7 @@ namespace Baracuda.Serialization
         #region Fields
 
         [Header("General")]
-        [Tooltip("The root folder fot the files system (relative to the application data path).")]
+        [Tooltip("The root folder fot the files system (relative to the application value path).")]
         [SerializeField] private string rootFolder;
 
         [Tooltip("When enabled, root folder are versioned.")]
@@ -26,7 +26,7 @@ namespace Baracuda.Serialization
         [SerializeField] private bool useUnityVersion;
 
         [HideIf(nameof(useUnityVersion))]
-        [Tooltip("The root folder fot the files system (relative to the application data path).")]
+        [Tooltip("The root folder fot the files system (relative to the application value path).")]
         [SerializeField] private string version;
 
         [Header("File Endings")]

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Baracuda.Serialization
 {
     /// <summary>
-    ///     Stores file data with type information.
+    ///     Stores file value with type information.
     /// </summary>
     public readonly struct FileData<T>
     {
@@ -57,7 +57,7 @@ namespace Baracuda.Serialization
     }
 
     /// <summary>
-    ///     Stores file data without type information.
+    ///     Stores file value without type information.
     /// </summary>
     public readonly struct FileData
     {
