@@ -1,10 +1,10 @@
-﻿using Baracuda.Utilities;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using Baracuda.Utilities;
 using UnityEngine;
 
 namespace Baracuda.Serialization
@@ -46,7 +46,7 @@ namespace Baracuda.Serialization
         #region File Ending
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ValidateFileName(ref string fileName)
+        public void SanitizeFileName(ref string fileName)
         {
             var fileExtension = Path.GetExtension(fileName);
 
@@ -91,8 +91,8 @@ namespace Baracuda.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string CombineStringsNoAlloc(string string1, string string2)
         {
-            var categoryBuffer = (ReadOnlySpan<char>) string1;
-            var messageBuffer = (ReadOnlySpan<char>) string2;
+            var categoryBuffer = (ReadOnlySpan<char>)string1;
+            var messageBuffer = (ReadOnlySpan<char>)string2;
 
             Span<char> resultBuffer = stackalloc char[categoryBuffer.Length + messageBuffer.Length];
 

@@ -1,6 +1,6 @@
-﻿using Baracuda.Utilities.Editor.Inspector;
+﻿using System.Collections.Generic;
+using Baracuda.Utilities.Editor.Inspector;
 using Cysharp.Threading.Tasks;
-using System.Collections.Generic;
 using UnityEngine;
 using GUIUtility = Baracuda.Utilities.Editor.Helper.GUIUtility;
 
@@ -30,11 +30,11 @@ namespace Baracuda.Serialization.Editor
 
             var initializationFlags = FileSystemEditorSettings.instance.InitializationFlags;
             initializationFlags =
-                (InitializeFlags) UnityEditor.EditorGUILayout.EnumFlagsField("Initialization", initializationFlags);
+                (InitializeFlags)UnityEditor.EditorGUILayout.EnumFlagsField("Initialization", initializationFlags);
             FileSystemEditorSettings.instance.InitializationFlags = initializationFlags;
 
             var shutdownFlags = FileSystemEditorSettings.instance.ShutdownFlags;
-            shutdownFlags = (ShutdownFlags) UnityEditor.EditorGUILayout.EnumFlagsField("Shutdown", shutdownFlags);
+            shutdownFlags = (ShutdownFlags)UnityEditor.EditorGUILayout.EnumFlagsField("Shutdown", shutdownFlags);
             FileSystemEditorSettings.instance.ShutdownFlags = shutdownFlags;
 
             GUI.enabled = false;
@@ -93,7 +93,7 @@ namespace Baracuda.Serialization.Editor
         private void DrawSetupArguments()
         {
             var arguments = FileSystemEditorSettings.instance.FileSystemArguments;
-            arguments = (FileSystemArgumentsAsset) UnityEditor.EditorGUILayout.ObjectField("Settings", arguments,
+            arguments = (FileSystemArgumentsAsset)UnityEditor.EditorGUILayout.ObjectField("Settings", arguments,
                 typeof(FileSystemArgumentsAsset), false);
             FileSystemEditorSettings.instance.FileSystemArguments = arguments;
 
@@ -124,9 +124,15 @@ namespace Baracuda.Serialization.Editor
         }
 
         [UnityEditor.MenuItem("Tools/File System/Settings", priority = 5000)]
-        public static void MenuItem()
+        public static void OpenSettings()
         {
             UnityEditor.SettingsService.OpenProjectSettings("Project/Baracuda/File System");
+        }
+
+        [UnityEditor.MenuItem("Tools/File System/Open Persistent Data Path", priority = 5000)]
+        public static void OpenSettingsPath()
+        {
+            Application.OpenURL(Application.persistentDataPath);
         }
     }
 }

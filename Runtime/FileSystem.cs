@@ -1,9 +1,9 @@
-using Cysharp.Threading.Tasks;
-using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace Baracuda.Serialization
 {
@@ -31,7 +31,7 @@ namespace Baracuda.Serialization
         }
 
         /// <summary>
-        ///     The loaded player <see cref="Serialization.Profile" />.
+        ///     The loaded player <see cref="Serialization.ISaveProfile" />.
         /// </summary>
         /// <exception cref="FileSystemNotInitializedException"></exception>
         [PublicAPI]
@@ -40,7 +40,7 @@ namespace Baracuda.Serialization
             : throw new FileSystemNotInitializedException(nameof(Profile));
 
         /// <summary>
-        ///     The persistent shared <see cref="Serialization.Profile" />.
+        ///     The persistent shared <see cref="Serialization.ISaveProfile" />.
         ///     This profile contains non profile specific persistent value
         ///     and can be used to store value that is non profile specific.
         /// </summary>
@@ -66,25 +66,25 @@ namespace Baracuda.Serialization
         public static FileSystemState State { get; private set; }
 
         /// <summary>
-        ///     Event is invoked when the active <see cref="IProfile" /> has changed.
+        ///     Event is invoked when the active <see cref="ISaveProfile" /> has changed.
         /// </summary>
         [PublicAPI]
         public static event ProfileChangedDelegate ProfileChanged;
 
         /// <summary>
-        ///     Event is invoked when a new <see cref="IProfile" /> was created.
+        ///     Event is invoked when a new <see cref="ISaveProfile" /> was created.
         /// </summary>
         [PublicAPI]
         public static event ProfileCreatedDelegate ProfileCreated;
 
         /// <summary>
-        ///     Event is invoked before a <see cref="IProfile" /> is deleted.
+        ///     Event is invoked before a <see cref="ISaveProfile" /> is deleted.
         /// </summary>
         [PublicAPI]
         public static event ProfileDeletedDelegate ProfileDeleted;
 
         /// <summary>
-        ///     Event is invoked before a <see cref="IProfile" /> is deleted.
+        ///     Event is invoked before a <see cref="ISaveProfile" /> is deleted.
         /// </summary>
         [PublicAPI]
         public static event ProfileResetDelegate ProfileReset;

@@ -1,9 +1,10 @@
-﻿using Baracuda.Utilities;
-using Cysharp.Threading.Tasks;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using Baracuda.Utilities;
+using Cysharp.Threading.Tasks;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -34,8 +35,10 @@ namespace Baracuda.Serialization
 
         public string DisplayName => profileDisplayName;
         public string FolderName => profileFolderName;
+
         public DateTime CreatedTimeStamp =>
             DateTime.TryParse(createdTimeStamp, out var timeStamp) ? timeStamp : DateTime.Now;
+
         public bool IsLoaded { get; private set; }
         public string ProfileFilePath => Path.Combine(profileFolderName, profileFileName);
         public SaveProfileData Info => new(DisplayName, FolderName, CreatedTimeStamp, ProfileFilePath, files);
@@ -45,9 +48,14 @@ namespace Baracuda.Serialization
 
         #region Save & Store File
 
-        public void SaveFile<T>(string fileName, T value, StoreOptions options = default)
+        public void SaveFile<T>([NotNull] string fileName, T value, StoreOptions options = default)
         {
-            FileSystem.Validator.ValidateFileName(ref fileName);
+            if (fileName.IsNullOrWhitespace())
+            {
+                throw new ArgumentNullException(nameof(fileName));
+            }
+
+            FileSystem.Validator.SanitizeFileName(ref fileName);
 
             SaveData<T> saveData;
 
@@ -94,14 +102,18 @@ namespace Baracuda.Serialization
             if (files.AddUnique(header))
             {
                 var profileFilePath = ProfileFilePath;
-                FileSystem.Validator.ValidateFileName(ref profileFilePath);
+                FileSystem.Validator.SanitizeFileName(ref profileFilePath);
                 FileSystem.Storage.Save(profileFilePath, this);
             }
         }
 
-        public void StoreFile<T>(string fileName, T value, StoreOptions options = default)
+        public void StoreFile<T>([NotNull] string fileName, T value, StoreOptions options = default)
         {
-            FileSystem.Validator.ValidateFileName(ref fileName);
+            if (fileName.IsNullOrWhitespace())
+            {
+                throw new ArgumentNullException(nameof(fileName));
+            }
+            FileSystem.Validator.SanitizeFileName(ref fileName);
 
             SaveData<T> saveData;
 
@@ -153,9 +165,13 @@ namespace Baracuda.Serialization
 
         #region Load File
 
-        public T LoadFile<T>(string fileName, StoreOptions options = default)
+        public T LoadFile<T>([NotNull] string fileName, StoreOptions options = default)
         {
-            FileSystem.Validator.ValidateFileName(ref fileName);
+            if (fileName.IsNullOrWhitespace())
+            {
+                throw new ArgumentNullException(nameof(fileName));
+            }
+            FileSystem.Validator.SanitizeFileName(ref fileName);
 
             if (_loadedFileDataCache.TryGetValue(fileName, out var data))
             {
@@ -168,16 +184,20 @@ namespace Baracuda.Serialization
 
             if (_loadedSaveDataCache.TryGetValue(fileName, out var file))
             {
-                var value = file is SaveData<T> save ? save.value : default(T);
+                var value = file is SaveData<T> save ? save.value : default;
                 return value;
             }
 
-            return default(T);
+            return default;
         }
 
-        public bool TryLoadFile<T>(string fileName, out T value, StoreOptions options = default)
+        public bool TryLoadFile<T>([NotNull] string fileName, out T value, StoreOptions options = default)
         {
-            FileSystem.Validator.ValidateFileName(ref fileName);
+            if (fileName.IsNullOrWhitespace())
+            {
+                throw new ArgumentNullException(nameof(fileName));
+            }
+            FileSystem.Validator.SanitizeFileName(ref fileName);
 
             if (_loadedFileDataCache.TryGetValue(fileName, out var data))
             {
@@ -200,7 +220,7 @@ namespace Baracuda.Serialization
                 }
             }
 
-            value = default(T);
+            value = default;
             return false;
         }
 
@@ -209,10 +229,14 @@ namespace Baracuda.Serialization
 
         #region Has & Delete File
 
-        public bool HasFile(string fileName)
+        public bool HasFile([NotNull] string fileName)
         {
+            if (fileName.IsNullOrWhitespace())
+            {
+                throw new ArgumentNullException(nameof(fileName));
+            }
             Assert.IsTrue(IsLoaded);
-            FileSystem.Validator.ValidateFileName(ref fileName);
+            FileSystem.Validator.SanitizeFileName(ref fileName);
             foreach (var header in files)
             {
                 if (header.fileName == fileName)
@@ -224,9 +248,13 @@ namespace Baracuda.Serialization
             return false;
         }
 
-        public void DeleteFile(string fileName)
+        public void DeleteFile([NotNull] string fileName)
         {
-            FileSystem.Validator.ValidateFileName(ref fileName);
+            if (fileName.IsNullOrWhitespace())
+            {
+                throw new ArgumentNullException(nameof(fileName));
+            }
+            FileSystem.Validator.SanitizeFileName(ref fileName);
             _loadedSaveDataCache.Remove(fileName);
             _loadedFileDataCache.Remove(fileName);
             for (var index = files.Count - 1; index >= 0; index--)
@@ -259,7 +287,7 @@ namespace Baracuda.Serialization
             if (_isDirty)
             {
                 var profileFilePath = ProfileFilePath;
-                FileSystem.Validator.ValidateFileName(ref profileFilePath);
+                FileSystem.Validator.SanitizeFileName(ref profileFilePath);
                 FileSystem.Storage.Save(profileFilePath, this);
             }
         }
@@ -272,17 +300,22 @@ namespace Baracuda.Serialization
             }
             foreach (var header in files)
             {
+                if (header.fileName.IsNullOrWhitespace())
+                {
+                    Debug.LogError(FileSystem.Log, $"Filename [{header.fileName.ToNullString()}] is not invalid!");
+                }
+
                 var filePath = Path.Combine(profileFolderName, header.fileName);
                 var type = Type.GetType(header.qualifiedTypeName);
                 if (type != null && type.GetGenericTypeDefinition() == typeof(SaveData<>))
                 {
                     var typedFileData = await FileSystem.Storage.LoadAsync(filePath, type);
-                    _loadedSaveDataCache.Add(header.fileName, (SaveData) typedFileData.Read());
+                    _loadedSaveDataCache.AddOrUpdate(header.fileName, (SaveData)typedFileData.Read());
                 }
                 else
                 {
                     var fileData = await FileSystem.Storage.LoadAsync(filePath);
-                    _loadedFileDataCache.Add(header.fileName, fileData);
+                    _loadedFileDataCache.AddOrUpdate(header.fileName, fileData);
                 }
             }
             IsLoaded = true;
@@ -296,12 +329,17 @@ namespace Baracuda.Serialization
             }
             foreach (var header in files)
             {
+                if (header.fileName.IsNullOrWhitespace())
+                {
+                    Debug.LogError(FileSystem.Log, $"Filename [{header.fileName.ToNullString()}] is not invalid!");
+                }
+
                 var filePath = Path.Combine(profileFolderName, header.fileName);
                 var type = Type.GetType(header.qualifiedTypeName);
                 if (type != null && type.GetGenericTypeDefinition() == typeof(SaveData<>))
                 {
                     var typedFileData = FileSystem.Storage.Load(filePath, type);
-                    _loadedSaveDataCache.AddOrUpdate(header.fileName, (SaveData) typedFileData.Read());
+                    _loadedSaveDataCache.AddOrUpdate(header.fileName, (SaveData)typedFileData.Read());
                 }
                 else
                 {

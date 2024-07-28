@@ -1,12 +1,12 @@
-﻿using Baracuda.Utilities;
-using Baracuda.Utilities.Pools;
-using Cysharp.Threading.Tasks;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Baracuda.Utilities;
+using Baracuda.Utilities.Pools;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Baracuda.Serialization
@@ -192,7 +192,7 @@ namespace Baracuda.Serialization
                 return;
             }
 
-            InitializationCompleted?.Invoke();
+            InitializationCompleted?.InvokeCritical();
         }
 
         private static void InitializeInternal(IFileSystemArgs args = null)
@@ -290,7 +290,7 @@ namespace Baracuda.Serialization
                 return;
             }
 
-            InitializationCompleted?.Invoke();
+            InitializationCompleted?.InvokeCritical();
         }
 
         #endregion
@@ -328,12 +328,12 @@ namespace Baracuda.Serialization
             sharedProfile = null;
             activeProfile = null;
             version = string.Empty;
-            fileSystemData = default(FileSystemData);
+            fileSystemData = default;
             initializationTaskCompletionSource.TrySetCanceled();
             initializationTaskCompletionSource = new TaskCompletionSource<object>();
             State = FileSystemState.Uninitialized;
             Debug.Log(Log, "Shutdown Completed", Verbosity.Message);
-            ShutdownCompleted?.Invoke();
+            ShutdownCompleted?.InvokeCritical();
         }
 
         private static void ShutdownInternal(in FileSystemShutdownArgs args)
@@ -347,7 +347,7 @@ namespace Baracuda.Serialization
             Debug.Log(Log, "Shutdown Started", Verbosity.Message);
             try
             {
-                ShutdownStarted?.Invoke();
+                ShutdownStarted?.InvokeCritical();
             }
             catch (Exception exception)
             {
@@ -366,12 +366,12 @@ namespace Baracuda.Serialization
             sharedProfile = null;
             activeProfile = null;
             version = string.Empty;
-            fileSystemData = default(FileSystemData);
+            fileSystemData = default;
             initializationTaskCompletionSource.TrySetCanceled();
             initializationTaskCompletionSource = new TaskCompletionSource<object>();
             State = FileSystemState.Uninitialized;
             Debug.Log(Log, "Shutdown Completed", Verbosity.Message);
-            ShutdownCompleted?.Invoke();
+            ShutdownCompleted?.InvokeCritical();
         }
 
         #endregion
@@ -511,7 +511,7 @@ namespace Baracuda.Serialization
             {
                 return false;
             }
-            if (activeProfile is {IsLoaded: true})
+            if (activeProfile is { IsLoaded: true })
             {
                 activeProfile.Unload();
             }
@@ -539,7 +539,7 @@ namespace Baracuda.Serialization
             {
                 return false;
             }
-            if (activeProfile is {IsLoaded: true})
+            if (activeProfile is { IsLoaded: true })
             {
                 activeProfile.Unload();
             }
