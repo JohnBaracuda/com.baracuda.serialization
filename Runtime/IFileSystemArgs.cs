@@ -7,6 +7,9 @@ namespace Baracuda.Serialization
         string RootFolder { get; set; }
         bool AppendVersionToRootFolder { get; set; }
         bool UseUnityVersion { get; set; }
+        bool UseMajorVersion { get; set; }
+        bool UseMinorVersion { get; set; }
+        bool UsePatchVersion { get; set; }
         string Version { get; set; }
         string FileEnding { get; set; }
         Optional<string[]> EnforceFileEndings { get; set; }

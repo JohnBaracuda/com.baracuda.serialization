@@ -134,5 +134,17 @@ namespace Baracuda.Serialization.Editor
         {
             Application.OpenURL(Application.persistentDataPath);
         }
+
+        [UnityEditor.MenuItem("Tools/File System/Initialize", priority = 5001)]
+        private static void InitializeFileSystem()
+        {
+            FileSystem.Initialize();
+        }
+
+        [UnityEditor.MenuItem("Tools/File System/Shutdown", priority = 5002)]
+        private static void ShutdownFileSystem()
+        {
+            FileSystem.Shutdown();
+        }
     }
 }

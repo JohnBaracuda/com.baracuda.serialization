@@ -2,12 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Baracuda.Utilities;
 using Baracuda.Utilities.Pools;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Baracuda.Serialization
 {
@@ -61,8 +63,9 @@ namespace Baracuda.Serialization
             if (args.AppendVersionToRootFolder)
             {
                 rootFolderBuilder.Append('_');
-                rootFolderBuilder.Append(args.UseUnityVersion ? Application.version : args.Version);
+                rootFolderBuilder.Append(args.UseUnityVersion ? GetSanitizedUnityVersionString(args) : args.Version);
             }
+
             RootFolder = StringBuilderPool.BuildAndRelease(rootFolderBuilder);
 
             var encryptionProvider = args.EncryptionAsset.ValueOrDefault();
@@ -87,6 +90,44 @@ namespace Baracuda.Serialization
 
             Debug.Log("File System", $"Created {fileOperations} File Storage!");
             return storage;
+        }
+
+        private static string GetSanitizedUnityVersionString(in IFileSystemArgs args)
+        {
+            try
+            {
+                var versionString = Application.version;
+                if (versionString.IsNullOrWhitespace())
+                {
+                    return string.Empty;
+                }
+
+                var segments = versionString.Split('.');
+
+                Assert.IsTrue(segments.Length == 3, "segments.Length == 3");
+
+                var major = segments[0];
+                var minor = segments[1];
+                var patch = segments[2];
+
+                Assert.IsTrue(major.IsNotNullOrWhitespace(), "major.IsNotNullOrWhitespace()");
+                Assert.IsTrue(minor.IsNotNullOrWhitespace(), "minor.IsNotNullOrWhitespace()");
+                Assert.IsTrue(patch.IsNotNullOrWhitespace(), "patch.IsNotNullOrWhitespace()");
+
+                var builder = new StringBuilder();
+                builder.Append(args.UseMajorVersion ? major : "x");
+                builder.Append('.');
+                builder.Append(args.UseMinorVersion ? minor : "x");
+                builder.Append('.');
+                builder.Append(args.UsePatchVersion ? patch : "x");
+                return builder.ToString();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+                Debug.Log("File System", "Exception while parsing unity version to format (Major.Minor.Patch) using raw version string instead!");
+                return Application.version;
+            }
         }
 
         #endregion
@@ -121,7 +162,7 @@ namespace Baracuda.Serialization
                 }
 
                 profileLimit = args.ProfileLimit.ValueOrDefault() > 0 ? args.ProfileLimit : uint.MaxValue;
-                version = args.UseUnityVersion ? Application.version : args.Version ?? string.Empty;
+                version = args.UseUnityVersion ? GetSanitizedUnityVersionString(args) : args.Version ?? string.Empty;
                 validator = new FileValidator(args);
                 Storage = CreateFileStorage(args);
                 defaultProfileName = args.DefaultProfileName;
@@ -218,7 +259,7 @@ namespace Baracuda.Serialization
                 }
 
                 profileLimit = args.ProfileLimit.ValueOrDefault() > 0 ? args.ProfileLimit : uint.MaxValue;
-                version = args.UseUnityVersion ? Application.version : args.Version ?? string.Empty;
+                version = args.UseUnityVersion ? GetSanitizedUnityVersionString(args) : args.Version ?? string.Empty;
                 validator = new FileValidator(args);
                 Storage = CreateFileStorage(args);
                 defaultProfileName = args.DefaultProfileName;

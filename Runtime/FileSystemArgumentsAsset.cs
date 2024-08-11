@@ -25,6 +25,15 @@ namespace Baracuda.Serialization
         [Tooltip("When enabled, the unity version will be used instead of the version string defined below")]
         [SerializeField] private bool useUnityVersion;
 
+        [Tooltip("When enabled, the major unity version is used for the version string")]
+        [SerializeField] private bool useMajorVersion = true;
+
+        [Tooltip("When enabled, the minor unity version is used for the version string")]
+        [SerializeField] private bool useMinorVersion = true;
+
+        [Tooltip("When enabled, the patch unity version is used for the version string")]
+        [SerializeField] private bool usePatchVersion;
+
         [HideIf(nameof(useUnityVersion))]
         [Tooltip("The root folder fot the files system (relative to the application value path).")]
         [SerializeField] private string version;
@@ -97,6 +106,24 @@ namespace Baracuda.Serialization
         {
             get => useUnityVersion;
             set => useUnityVersion = value;
+        }
+
+        public bool UseMajorVersion
+        {
+            get => useMajorVersion;
+            set => useMajorVersion = value;
+        }
+
+        public bool UseMinorVersion
+        {
+            get => useMinorVersion;
+            set => useMinorVersion = value;
+        }
+
+        public bool UsePatchVersion
+        {
+            get => usePatchVersion;
+            set => usePatchVersion = value;
         }
 
         public string Version
