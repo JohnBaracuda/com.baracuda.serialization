@@ -44,42 +44,43 @@ namespace Baracuda.Serialization
         public void Add(TValue value)
         {
             _list.Add(value);
+            _addedEvent.Raise(value);
             Profile.SaveFile(Key, _list);
         }
 
         public void Clear()
         {
-            throw new NotImplementedException();
+            _list.Clear();
+            Profile.SaveFile(Key, _list);
         }
 
         public void AddUnique(TValue value)
         {
             if (_list.AddUnique(value))
             {
+                _addedEvent.Raise(value);
                 Profile.SaveFile(Key, _list);
             }
         }
 
         public void CopyTo(TValue[] array, int arrayIndex)
         {
-            throw new NotImplementedException();
+            _list.CopyTo(array, arrayIndex);
         }
 
-        bool ICollection<TValue>.Remove(TValue item)
+        public bool Remove(TValue item)
         {
-            throw new NotImplementedException();
-        }
-
-        public int Count { get; }
-        public bool IsReadOnly { get; }
-
-        public void Remove(TValue value)
-        {
-            if (_list.Remove(value))
+            if (_list.Remove(item))
             {
+                _removedEvent.Raise(item);
                 Profile.SaveFile(Key, _list);
+                return true;
             }
+            return false;
         }
+
+        public int Count => _list.Count;
+        public bool IsReadOnly => false;
 
         public bool Contains(TValue value)
         {
@@ -139,6 +140,7 @@ namespace Baracuda.Serialization
 
         private void OnFileSystemInitialized()
         {
+            UpdateSaveDataKey();
             if (Profile.HasFile(Key) is false)
             {
                 _list = new List<TValue>();
@@ -152,6 +154,11 @@ namespace Baracuda.Serialization
             {
                 _list = Profile.LoadFile<List<TValue>>(Key);
             }
+        }
+
+        private void OnDisable()
+        {
+            FileSystem.InitializationCompleted -= OnFileSystemInitialized;
         }
 
         #endregion
@@ -175,12 +182,15 @@ namespace Baracuda.Serialization
         public void Insert(int index, TValue item)
         {
             _list.Insert(index, item);
+            _addedEvent.Raise(item);
             Profile.SaveFile(Key, _list);
         }
 
         public void RemoveAt(int index)
         {
+            var item = _list[index];
             _list.RemoveAt(index);
+            _removedEvent.Raise(item);
             Profile.SaveFile(Key, _list);
         }
 
