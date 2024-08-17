@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using Baracuda.Utilities;
+using Baracuda.Bedrock.Utilities;
 using UnityEngine;
 
 namespace Baracuda.Serialization

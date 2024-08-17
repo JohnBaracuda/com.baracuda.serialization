@@ -1,12 +1,12 @@
-﻿using Baracuda.Utilities;
-using Baracuda.Utilities.Collections;
-using Cysharp.Threading.Tasks;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Baracuda.Bedrock.Collections;
+using Baracuda.Bedrock.Utilities;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Baracuda.Serialization
@@ -300,18 +300,23 @@ namespace Baracuda.Serialization
             {
                 case LoggingLevel.None:
                     break;
+
                 case LoggingLevel.Message:
                     Debug.Log("Storage", exception.ToString());
                     break;
+
                 case LoggingLevel.Warning:
                     Debug.LogWarning("Storage", exception.ToString());
                     break;
+
                 case LoggingLevel.Error:
                     Debug.LogError("Storage", exception.ToString());
                     break;
+
                 case LoggingLevel.Exception:
                     Debug.LogException("Storage", exception);
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }

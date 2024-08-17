@@ -1,5 +1,5 @@
-using Baracuda.Utilities;
 using System;
+using Baracuda.Bedrock.Utilities;
 using UnityEngine;
 
 namespace Baracuda.Serialization.Editor
@@ -121,6 +121,7 @@ namespace Baracuda.Serialization.Editor
                         FileSystem.Initialize(instance.Args);
                     }
                     break;
+
                 case UnityEditor.PlayModeStateChange.ExitingEditMode:
                     if (instance.shutdown.HasFlagFast(ShutdownFlags.ShutdownOnExitEditMode))
                     {
@@ -132,6 +133,7 @@ namespace Baracuda.Serialization.Editor
                         FileSystem.Shutdown(shutdownArgs);
                     }
                     break;
+
                 case UnityEditor.PlayModeStateChange.EnteredPlayMode:
                     if (isUninitialized &&
                         instance.initialization.HasFlagFast(InitializeFlags.InitializeOnEnterPlayMode))
@@ -139,6 +141,7 @@ namespace Baracuda.Serialization.Editor
                         FileSystem.Initialize(instance.Args);
                     }
                     break;
+
                 case UnityEditor.PlayModeStateChange.ExitingPlayMode:
                     if (instance.shutdown.HasFlagFast(ShutdownFlags.ShutdownOnExitPlayMode))
                     {
@@ -150,6 +153,7 @@ namespace Baracuda.Serialization.Editor
                         FileSystem.Shutdown(shutdownArgs);
                     }
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(state), state, null);
             }

@@ -1,6 +1,6 @@
-﻿using Baracuda.Utilities;
-using System.Text;
+﻿using System.Text;
 using System.Threading.Tasks;
+using Baracuda.Bedrock.Collections;
 
 namespace Baracuda.Serialization
 {

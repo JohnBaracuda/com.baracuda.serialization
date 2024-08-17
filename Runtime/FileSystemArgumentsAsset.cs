@@ -1,4 +1,4 @@
-using Baracuda.Utilities.Types;
+using Baracuda.Bedrock.Types;
 using Sirenix.OdinInspector;
 using UnityEngine;
 

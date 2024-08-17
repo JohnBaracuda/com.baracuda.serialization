@@ -20,6 +20,6 @@
   "type": "tool",
   "dependencies": {
     "com.cysharp.unitask": "2.3.3",
-    "com.baracuda.utilities": "1.0.0"
+    "com.baracuda.bedrock": "1.0.0"
   }
 }

@@ -1,6 +1,7 @@
-﻿using Baracuda.Utilities;
-using System.Text;
+﻿using System.Text;
 using System.Threading.Tasks;
+using Baracuda.Bedrock.Collections;
+using Baracuda.Bedrock.Utilities;
 
 namespace Baracuda.Serialization
 {
@@ -19,7 +20,7 @@ namespace Baracuda.Serialization
 
             for (var i = 0; i < plainBytes.Length; i++)
             {
-                encrypted[i] = (byte) (plainBytes[i] ^ keyBytes[i % keyBytes.Length]);
+                encrypted[i] = (byte)(plainBytes[i] ^ keyBytes[i % keyBytes.Length]);
             }
 
             return encrypted;
@@ -36,7 +37,7 @@ namespace Baracuda.Serialization
 
             for (var i = 0; i < content.Length; i++)
             {
-                decryptedBytes[i] = (byte) (content[i] ^ keyBytes[i % keyBytes.Length]);
+                decryptedBytes[i] = (byte)(content[i] ^ keyBytes[i % keyBytes.Length]);
             }
 
             var decrypted = Encoding.UTF8.GetString(decryptedBytes);

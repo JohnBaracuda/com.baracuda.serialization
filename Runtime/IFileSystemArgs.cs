@@ -1,4 +1,4 @@
-﻿using Baracuda.Utilities.Types;
+﻿using Baracuda.Bedrock.Types;
 
 namespace Baracuda.Serialization
 {

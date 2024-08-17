@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using Baracuda.Utilities;
+using Baracuda.Bedrock.Collections;
+using Baracuda.Bedrock.Utilities;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -176,6 +177,10 @@ namespace Baracuda.Serialization
             if (_loadedFileDataCache.TryGetValue(fileName, out var data))
             {
                 var saveData = data.Read<SaveData<T>>();
+                if (_loadedSaveDataCache.ContainsKey(fileName))
+                {
+                    Debug.LogError(fileName + " " + options.Tags.ToCollectionString(','));
+                }
                 _loadedSaveDataCache.Add(fileName, saveData);
                 _loadedFileDataCache.Remove(fileName);
                 var value = saveData.value;

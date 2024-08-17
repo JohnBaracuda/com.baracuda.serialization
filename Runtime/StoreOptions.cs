@@ -1,4 +1,4 @@
-﻿using Baracuda.Utilities.Types;
+﻿using Baracuda.Bedrock.Types;
 
 namespace Baracuda.Serialization
 {
@@ -15,7 +15,7 @@ namespace Baracuda.Serialization
 
         public StoreOptions(params string[] tags)
         {
-            Encryption = default(Optional<bool>);
+            Encryption = default;
             Tags = tags;
         }
 

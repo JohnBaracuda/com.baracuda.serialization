@@ -1,6 +1,6 @@
-﻿using Baracuda.Utilities.Pools;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Baracuda.Bedrock.Pools;
 
 namespace Baracuda.Serialization
 {

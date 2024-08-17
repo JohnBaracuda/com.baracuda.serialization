@@ -1,5 +1,5 @@
 ﻿using System;
-using Baracuda.Utilities.Types;
+using Baracuda.Bedrock.Types;
 using UnityEngine;
 
 namespace Baracuda.Serialization
