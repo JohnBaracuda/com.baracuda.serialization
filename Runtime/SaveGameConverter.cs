@@ -5,8 +5,8 @@ namespace Baracuda.Serialization
 {
     public abstract class SaveGameConverter : ScriptableObject
     {
-        [SerializeField] private FileSystemArgs converterFileSystem;
-        public FileSystemArgs FileSystemArgs => converterFileSystem;
+        [SerializeField] private FileSystemSettings converterFileSystem;
+        public FileSystemSettings FileSystemSettings => converterFileSystem;
 
         public abstract UniTask ConvertAsync(IFileStorage storage, ISaveProfile profile, ISaveProfile systemProfile);
 

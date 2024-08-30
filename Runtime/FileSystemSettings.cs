@@ -1,10 +1,11 @@
+﻿using System;
 using Baracuda.Bedrock.Types;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Baracuda.Serialization
 {
-    public class FileSystemArgumentsAsset : ScriptableObject, IFileSystemArgs
+    [Serializable]
+    public struct FileSystemSettings : IFileSystemSettings
     {
         #region Fields
 
@@ -13,37 +14,32 @@ namespace Baracuda.Serialization
         [SerializeField] private string rootFolder;
 
         [Tooltip("When enabled, root folder are versioned.")]
-        [SerializeField] private bool appendVersionToRootFolder;
+        [SerializeField] private bool versionRootFolder;
 
-        [Tooltip("When enabled, the initialization process is forced to execute synchronous.")]
-        [SerializeField] private bool forceSynchronous;
-
-        [Tooltip("Custom platform file storage providers")]
-        [SerializeField] private Optional<FileOperationAsset> fileStorageProvider;
-
-        [Header("Version")]
         [Tooltip("When enabled, the unity version will be used instead of the version string defined below")]
         [SerializeField] private bool useUnityVersion;
 
         [Tooltip("When enabled, the major unity version is used for the version string")]
-        [SerializeField] private bool useMajorVersion = true;
+        [SerializeField] private bool useMajorVersion;
 
         [Tooltip("When enabled, the minor unity version is used for the version string")]
-        [SerializeField] private bool useMinorVersion = true;
+        [SerializeField] private bool useMinorVersion;
 
         [Tooltip("When enabled, the patch unity version is used for the version string")]
         [SerializeField] private bool usePatchVersion;
 
-        [HideIf(nameof(useUnityVersion))]
         [Tooltip("The root folder fot the files system (relative to the application value path).")]
         [SerializeField] private string version;
 
         [Header("File Endings")]
         [Tooltip("Custom file ending that is used for files without specifically set file endings.")]
-        [SerializeField] private string fileEnding = ".sav";
+        [SerializeField] private string fileEnding;
 
         [Tooltip("Array to limit the use of file endings. If empty, every file ending can be used.")]
         [SerializeField] private Optional<string[]> enforceFileEndings;
+
+        [Tooltip("When enabled, the initialization process is forced to execute synchronous.")]
+        [SerializeField] private bool forceSynchronous;
 
         [Header("Profiles")]
         [Tooltip("The default name used for created profiles.")]
@@ -58,7 +54,7 @@ namespace Baracuda.Serialization
 
         [Header("Logging")]
         [Tooltip("When enabled, exceptions are logged to the console.")]
-        [SerializeField] private LoggingLevel loggingLevel = LoggingLevel.Exception;
+        [SerializeField] private LoggingLevel exceptions;
 
         [Tooltip("When enabled, a warning is logged when a file name is passed without a specified file extension.")]
         [SerializeField] private bool logMissingFileExtensionWarning;
@@ -69,6 +65,9 @@ namespace Baracuda.Serialization
 
         [Tooltip("Custom encryption pass phrase. If none is provided a default value is used.")]
         [SerializeField] private Optional<string> encryptionKey;
+
+        [Tooltip("Custom platform file storage providers")]
+        [SerializeField] private Optional<FileOperationAsset> fileStorageProvider;
 
         [Header("Shutdown")]
         [SerializeField] private bool forceSynchronousShutdown;
@@ -86,20 +85,8 @@ namespace Baracuda.Serialization
 
         public bool AppendVersionToRootFolder
         {
-            get => appendVersionToRootFolder;
-            set => appendVersionToRootFolder = value;
-        }
-
-        public bool ForceSynchronous
-        {
-            get => forceSynchronous;
-            set => forceSynchronous = value;
-        }
-
-        public Optional<FileOperationAsset> FileStorageProvider
-        {
-            get => fileStorageProvider;
-            set => fileStorageProvider = value;
+            get => versionRootFolder;
+            set => versionRootFolder = value;
         }
 
         public bool UseUnityVersion
@@ -144,6 +131,12 @@ namespace Baracuda.Serialization
             set => enforceFileEndings = value;
         }
 
+        public bool ForceSynchronous
+        {
+            get => forceSynchronous;
+            set => forceSynchronous = value;
+        }
+
         public string DefaultProfileName
         {
             get => defaultProfileName;
@@ -164,8 +157,8 @@ namespace Baracuda.Serialization
 
         public LoggingLevel LoggingLevel
         {
-            get => loggingLevel;
-            set => loggingLevel = value;
+            get => exceptions;
+            set => exceptions = value;
         }
 
         public bool LogMissingFileExtensionWarning
@@ -184,6 +177,12 @@ namespace Baracuda.Serialization
         {
             get => encryptionKey;
             set => encryptionKey = value;
+        }
+
+        public Optional<FileOperationAsset> FileStorageProvider
+        {
+            get => fileStorageProvider;
+            set => fileStorageProvider = value;
         }
 
         public bool ForceSynchronousShutdown

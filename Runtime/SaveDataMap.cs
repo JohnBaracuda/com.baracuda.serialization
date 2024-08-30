@@ -4,19 +4,17 @@ using System.IO;
 using Baracuda.Bedrock.Collections;
 using Baracuda.Bedrock.Types;
 using JetBrains.Annotations;
-using Sirenix.OdinInspector;
+using NaughtyAttributes;
 using UnityEngine;
 
 namespace Baracuda.Serialization
 {
     public abstract class SaveDataMap<TKey, TValue> : SaveDataAsset
     {
-        [LabelText("Default Value")]
         [SerializeField] private Map<TKey, TValue> defaultMap;
         [NonSerialized] private readonly Broadcast<KeyValuePair<TKey, TValue>> _changedEvent = new();
         [NonSerialized] private readonly Broadcast<KeyValuePair<TKey, TValue>> _addedEvent = new();
         [NonSerialized] private readonly Broadcast<KeyValuePair<TKey, TValue>> _removedEvent = new();
-        [ShowInInspector]
         [NonSerialized] private Map<TKey, TValue> _map;
 
 
@@ -82,7 +80,6 @@ namespace Baracuda.Serialization
         };
 
         [Button]
-        [PropertySpace(SpaceBefore = 0, SpaceAfter = 8)]
         private void OpenInFileSystem()
         {
             var dataPath = Application.persistentDataPath;
@@ -93,7 +90,6 @@ namespace Baracuda.Serialization
         }
 
         [Button("Reset")]
-        [ButtonGroup("Persistent")]
         public override void ResetPersistentData()
         {
             _map = new Map<TKey, TValue>();

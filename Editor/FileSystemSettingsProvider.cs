@@ -8,6 +8,7 @@ namespace Baracuda.Serialization.Editor
 {
     public class FileSystemSettingsProvider : UnityEditor.SettingsProvider
     {
+        private UnityEditor.SerializedObject _serializedObject;
         private UnityEditor.SerializedObject _argsObject;
         private UnityEditor.SerializedProperty _argsProperty;
         private UnityEditor.Editor _argsEditor;
@@ -25,6 +26,8 @@ namespace Baracuda.Serialization.Editor
         public override void OnGUI(string searchContext)
         {
             base.OnGUI(searchContext);
+
+            _serializedObject ??= new UnityEditor.SerializedObject(FileSystemEditorSettings.instance);
 
             UnityEditor.EditorGUILayout.Space(20);
 
@@ -70,17 +73,12 @@ namespace Baracuda.Serialization.Editor
             GUI.enabled = FileSystem.State == FileSystemState.Uninitialized;
             if (GUILayout.Button("Initialize"))
             {
-                FileSystem.InitializeAsync(FileSystemEditorSettings.instance.Args).Forget();
+                FileSystem.InitializeAsync(FileSystemEditorSettings.instance.Settings).Forget();
             }
             GUI.enabled = FileSystem.State == FileSystemState.Initialized;
             if (GUILayout.Button("Shutdown"))
             {
-                var shutdownArgs = new FileSystemShutdownArgs
-                {
-                    forceSynchronousShutdown = FileSystemEditorSettings.instance.Args.ForceSynchronousShutdown
-                };
-
-                FileSystem.ShutdownAsync(shutdownArgs);
+                FileSystem.ShutdownAsync();
             }
             GUI.enabled = true;
             if (GUILayout.Button("Storage"))
@@ -92,10 +90,10 @@ namespace Baracuda.Serialization.Editor
 
         private void DrawSetupArguments()
         {
-            var arguments = FileSystemEditorSettings.instance.FileSystemArguments;
-            arguments = (FileSystemArgumentsAsset)UnityEditor.EditorGUILayout.ObjectField("Settings", arguments,
-                typeof(FileSystemArgumentsAsset), false);
-            FileSystemEditorSettings.instance.FileSystemArguments = arguments;
+            var arguments = FileSystemEditorSettings.instance.FileSystemSettings;
+            arguments = (FileSystemSettingsAsset)UnityEditor.EditorGUILayout.ObjectField("Settings", arguments, typeof(FileSystemSettingsAsset), false);
+
+            FileSystemEditorSettings.instance.FileSystemSettings = arguments;
 
             if (arguments != null)
             {

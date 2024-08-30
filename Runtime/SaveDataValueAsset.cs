@@ -4,7 +4,7 @@ using System.IO;
 using Baracuda.Bedrock.Types;
 using Baracuda.Bedrock.Utilities;
 using JetBrains.Annotations;
-using Sirenix.OdinInspector;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Serialization;
@@ -20,7 +20,7 @@ namespace Baracuda.Serialization
         [NonSerialized] private bool _isValueCached;
 
         [PublicAPI]
-        [ShowInInspector]
+        [ShowNativeProperty]
         public TValue Value
         {
             get => GetValue();
@@ -87,7 +87,6 @@ namespace Baracuda.Serialization
         };
 
         [Button]
-        [PropertySpace(SpaceBefore = 0, SpaceAfter = 8)]
         private void OpenInFileSystem()
         {
             var dataPath = Application.persistentDataPath;
@@ -98,7 +97,6 @@ namespace Baracuda.Serialization
         }
 
         [Button("Reset")]
-        [ButtonGroup("Persistent")]
         public override void ResetPersistentData()
         {
             Value = defaultValue;
@@ -110,7 +108,7 @@ namespace Baracuda.Serialization
 
         #region Initialization
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             UpdateSaveDataKey();
             FileSystem.InitializationCompleted -= OnFileSystemInitialized;

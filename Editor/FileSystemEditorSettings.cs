@@ -1,6 +1,7 @@
 using System;
 using Baracuda.Bedrock.Utilities;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Baracuda.Serialization.Editor
 {
@@ -32,9 +33,11 @@ namespace Baracuda.Serialization.Editor
     {
         [SerializeField] private InitializeFlags initialization;
         [SerializeField] private ShutdownFlags shutdown;
-        [SerializeField] private FileSystemArgumentsAsset fileSystemArguments;
 
-        public IFileSystemArgs Args => fileSystemArguments ? fileSystemArguments : default(FileSystemArgs);
+        [FormerlySerializedAs("fileSystemArguments")] [SerializeField]
+        private FileSystemSettingsAsset fileSystemSettings;
+
+        public IFileSystemSettings Settings => fileSystemSettings;
 
         internal InitializeFlags InitializationFlags
         {
@@ -48,10 +51,10 @@ namespace Baracuda.Serialization.Editor
             set => shutdown = value;
         }
 
-        public FileSystemArgumentsAsset FileSystemArguments
+        public FileSystemSettingsAsset FileSystemSettings
         {
-            get => fileSystemArguments;
-            set => fileSystemArguments = value;
+            get => fileSystemSettings;
+            set => fileSystemSettings = value;
         }
 
         public void SaveSettings()
@@ -73,7 +76,7 @@ namespace Baracuda.Serialization.Editor
             if (isUninitialized && instance.initialization.HasFlagFast(InitializeFlags.AfterAssembliesLoaded))
             {
                 FileSystem.Shutdown();
-                FileSystem.Initialize(instance.Args);
+                FileSystem.Initialize(instance.Settings);
             }
         }
 
@@ -85,11 +88,11 @@ namespace Baracuda.Serialization.Editor
             {
                 var shutdownArgs = new FileSystemShutdownArgs
                 {
-                    forceSynchronousShutdown = instance.Args.ForceSynchronousShutdown
+                    forceSynchronousShutdown = instance.Settings.ForceSynchronousShutdown
                 };
 
                 FileSystem.Shutdown(shutdownArgs);
-                FileSystem.Initialize(instance.Args);
+                FileSystem.Initialize(instance.Settings);
             }
         }
 
@@ -101,11 +104,11 @@ namespace Baracuda.Serialization.Editor
             {
                 var shutdownArgs = new FileSystemShutdownArgs
                 {
-                    forceSynchronousShutdown = instance.Args.ForceSynchronousShutdown
+                    forceSynchronousShutdown = instance.Settings.ForceSynchronousShutdown
                 };
 
                 FileSystem.Shutdown(shutdownArgs);
-                FileSystem.Initialize(instance.Args);
+                FileSystem.Initialize(instance.Settings);
             }
         }
 
@@ -118,7 +121,7 @@ namespace Baracuda.Serialization.Editor
                     if (isUninitialized &&
                         instance.initialization.HasFlagFast(InitializeFlags.InitializeOnEnterEditMode))
                     {
-                        FileSystem.Initialize(instance.Args);
+                        FileSystem.Initialize(instance.Settings);
                     }
                     break;
 
@@ -127,7 +130,7 @@ namespace Baracuda.Serialization.Editor
                     {
                         var shutdownArgs = new FileSystemShutdownArgs
                         {
-                            forceSynchronousShutdown = instance.Args.ForceSynchronousShutdown
+                            forceSynchronousShutdown = instance.Settings.ForceSynchronousShutdown
                         };
 
                         FileSystem.Shutdown(shutdownArgs);
@@ -138,7 +141,7 @@ namespace Baracuda.Serialization.Editor
                     if (isUninitialized &&
                         instance.initialization.HasFlagFast(InitializeFlags.InitializeOnEnterPlayMode))
                     {
-                        FileSystem.Initialize(instance.Args);
+                        FileSystem.Initialize(instance.Settings);
                     }
                     break;
 
@@ -147,7 +150,7 @@ namespace Baracuda.Serialization.Editor
                     {
                         var shutdownArgs = new FileSystemShutdownArgs
                         {
-                            forceSynchronousShutdown = instance.Args.ForceSynchronousShutdown
+                            forceSynchronousShutdown = instance.Settings.ForceSynchronousShutdown
                         };
 
                         FileSystem.Shutdown(shutdownArgs);
@@ -163,7 +166,7 @@ namespace Baracuda.Serialization.Editor
         {
             if (instance.InitializationFlags.HasFlagFast(InitializeFlags.DelayedCall))
             {
-                FileSystem.Initialize(instance.Args);
+                FileSystem.Initialize(instance.Settings);
             }
         }
     }

@@ -6,7 +6,7 @@ namespace Baracuda.Serialization
 {
     public abstract class FileOperationAsset : ScriptableObject, IFileOperations
     {
-        public abstract void Initialize(FileSystemArgs args = new());
+        public abstract void Initialize(FileSystemSettings settings = new());
 
         public abstract void Save();
 

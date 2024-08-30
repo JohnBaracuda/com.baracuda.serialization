@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Baracuda.Bedrock.Collections;
 using Baracuda.Bedrock.Pools;
+using Baracuda.Bedrock.Types;
 using Baracuda.Bedrock.Utilities;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -56,33 +57,33 @@ namespace Baracuda.Serialization
 
         #region Platform Storage Provider
 
-        private static IFileStorage CreateFileStorage(IFileSystemArgs args)
+        private static IFileStorage CreateFileStorage(IFileSystemSettings settings)
         {
             Debug.Log("File System", "Creating File Storage");
             var rootFolderBuilder = StringBuilderPool.Get();
-            rootFolderBuilder.Append(args.RootFolder.IsNotNullOrWhitespace() ? args.RootFolder : string.Empty);
-            if (args.AppendVersionToRootFolder)
+            rootFolderBuilder.Append(settings.RootFolder.IsNotNullOrWhitespace() ? settings.RootFolder : string.Empty);
+            if (settings.AppendVersionToRootFolder)
             {
                 rootFolderBuilder.Append('_');
-                rootFolderBuilder.Append(args.UseUnityVersion ? GetSanitizedUnityVersionString(args) : args.Version);
+                rootFolderBuilder.Append(settings.UseUnityVersion ? GetSanitizedUnityVersionString(settings) : settings.Version);
             }
 
             RootFolder = StringBuilderPool.BuildAndRelease(rootFolderBuilder);
 
-            var encryptionProvider = args.EncryptionAsset.ValueOrDefault();
-            var encryptionKey = args.EncryptionKey.TryGetValue(out var key) && key.IsNotNullOrWhitespace()
+            var encryptionProvider = settings.EncryptionAsset.ValueOrDefault();
+            var encryptionKey = settings.EncryptionKey.TryGetValue(out var key) && key.IsNotNullOrWhitespace()
                 ? key
                 : DefaultEncryptionKey;
 
-            var fileOperations = args.FileStorageProvider.ValueOrDefault() as IFileOperations ??
+            var fileOperations = settings.FileStorageProvider.ValueOrDefault() as IFileOperations ??
                                  new MonoFileOperations();
 
             var fileStorageArguments = new FileStorageArguments(
                 RootFolder,
                 encryptionKey,
                 encryptionProvider,
-                args.LoggingLevel,
-                args.ForceSynchronous,
+                settings.LoggingLevel,
+                settings.ForceSynchronous,
                 fileOperations
             );
 
@@ -93,7 +94,7 @@ namespace Baracuda.Serialization
             return storage;
         }
 
-        private static string GetSanitizedUnityVersionString(in IFileSystemArgs args)
+        private static string GetSanitizedUnityVersionString(in IFileSystemSettings settings)
         {
             try
             {
@@ -116,11 +117,11 @@ namespace Baracuda.Serialization
                 Assert.IsTrue(patch.IsNotNullOrWhitespace(), "patch.IsNotNullOrWhitespace()");
 
                 var builder = new StringBuilder();
-                builder.Append(args.UseMajorVersion ? major : "x");
+                builder.Append(settings.UseMajorVersion ? major : "x");
                 builder.Append('.');
-                builder.Append(args.UseMinorVersion ? minor : "x");
+                builder.Append(settings.UseMinorVersion ? minor : "x");
                 builder.Append('.');
-                builder.Append(args.UsePatchVersion ? patch : "x");
+                builder.Append(settings.UsePatchVersion ? patch : "x");
                 return builder.ToString();
             }
             catch (Exception exception)
@@ -136,17 +137,18 @@ namespace Baracuda.Serialization
 
         #region Initialization
 
-        private static async UniTask InitializeAsyncInternal(IFileSystemArgs args)
+        private static async UniTask InitializeAsyncInternal(IFileSystemSettings settings)
         {
             try
             {
+                settings ??= CreateDefaultSettings();
                 if (State != FileSystemState.Uninitialized)
                 {
                     return;
                 }
-                if (args.ForceSynchronous)
+                if (settings.ForceSynchronous)
                 {
-                    InitializeInternal(args);
+                    InitializeInternal(settings);
                     return;
                 }
 
@@ -162,11 +164,11 @@ namespace Baracuda.Serialization
                     Debug.LogException(exception);
                 }
 
-                profileLimit = args.ProfileLimit.ValueOrDefault() > 0 ? args.ProfileLimit : uint.MaxValue;
-                version = args.UseUnityVersion ? GetSanitizedUnityVersionString(args) : args.Version ?? string.Empty;
-                validator = new FileValidator(args);
-                Storage = CreateFileStorage(args);
-                defaultProfileName = args.DefaultProfileName;
+                profileLimit = settings.ProfileLimit.ValueOrDefault() > 0 ? settings.ProfileLimit : uint.MaxValue;
+                version = settings.UseUnityVersion ? GetSanitizedUnityVersionString(settings) : settings.Version ?? string.Empty;
+                validator = new FileValidator(settings);
+                Storage = CreateFileStorage(settings);
+                defaultProfileName = settings.DefaultProfileName;
 
                 var sharedProfilePath = Path.Combine(SharedProfileFolder, SharedProfileFileName);
                 var sharedProfileData = await Storage.LoadAsync<SaveProfile>(sharedProfilePath);
@@ -214,10 +216,10 @@ namespace Baracuda.Serialization
 
                 State = FileSystemState.Initialized;
 
-                var converter = args.SaveGameConverter.ValueOrDefault();
+                var converter = settings.SaveGameConverter.ValueOrDefault();
                 if (converter != null)
                 {
-                    var topLevelStorageProvider = CreateFileStorage(converter.FileSystemArgs);
+                    var topLevelStorageProvider = CreateFileStorage(converter.FileSystemSettings);
                     await converter.ConvertAsync(topLevelStorageProvider, profile, sharedProfile);
                     profile.Save();
                 }
@@ -237,11 +239,11 @@ namespace Baracuda.Serialization
             InitializationCompleted?.InvokeCritical();
         }
 
-        private static void InitializeInternal(IFileSystemArgs args = null)
+        private static void InitializeInternal(IFileSystemSettings settings = null)
         {
             try
             {
-                args ??= new FileSystemArgs();
+                settings ??= CreateDefaultSettings();
                 if (State != FileSystemState.Uninitialized)
                 {
                     return;
@@ -259,11 +261,11 @@ namespace Baracuda.Serialization
                     Debug.LogException(exception);
                 }
 
-                profileLimit = args.ProfileLimit.ValueOrDefault() > 0 ? args.ProfileLimit : uint.MaxValue;
-                version = args.UseUnityVersion ? GetSanitizedUnityVersionString(args) : args.Version ?? string.Empty;
-                validator = new FileValidator(args);
-                Storage = CreateFileStorage(args);
-                defaultProfileName = args.DefaultProfileName;
+                profileLimit = settings.ProfileLimit.ValueOrDefault() > 0 ? settings.ProfileLimit : uint.MaxValue;
+                version = settings.UseUnityVersion ? GetSanitizedUnityVersionString(settings) : settings.Version ?? string.Empty;
+                validator = new FileValidator(settings);
+                Storage = CreateFileStorage(settings);
+                defaultProfileName = settings.DefaultProfileName;
 
                 var sharedProfilePath = Path.Combine(SharedProfileFolder, SharedProfileFileName);
                 var sharedProfileData = Storage.Load<SaveProfile>(sharedProfilePath);
@@ -310,10 +312,10 @@ namespace Baracuda.Serialization
 
                 State = FileSystemState.Initialized;
 
-                var converter = args.SaveGameConverter.ValueOrDefault();
+                var converter = settings.SaveGameConverter.ValueOrDefault();
                 if (converter != null)
                 {
-                    var converterArgs = converter.FileSystemArgs;
+                    var converterArgs = converter.FileSystemSettings;
                     converterArgs.ForceSynchronous = true;
                     var topLevelStorageProvider = CreateFileStorage(converterArgs);
                     converter.Convert(topLevelStorageProvider, profile, sharedProfile);
@@ -333,6 +335,34 @@ namespace Baracuda.Serialization
             }
 
             InitializationCompleted?.InvokeCritical();
+        }
+
+        private static FileSystemSettings CreateDefaultSettings()
+        {
+            Debug.LogWarning("File System", "Creating default settings! It is recommended to initialize the game with custom settings!\n" +
+                                            "In the Editor: Set custom settings in ProjectSettings/Baracuda/File System\n" +
+                                            "In runtime builds: Set custom settings by manually calling FileSystem.Initialize(args)");
+            return new FileSystemSettings
+            {
+                RootFolder = "SaveGame",
+                AppendVersionToRootFolder = true,
+#if DEBUG
+                UseUnityVersion = true,
+                UseMajorVersion = true,
+                UseMinorVersion = true,
+                UsePatchVersion = false,
+#endif
+                Version = "1.0.0",
+                FileEnding = ".sav",
+                EnforceFileEndings = default,
+                DefaultProfileName = "Slot",
+                LoggingLevel = LoggingLevel.Message,
+                LogMissingFileExtensionWarning = false,
+                EncryptionAsset = default,
+                EncryptionKey = new Optional<string>("kc48sd9A87uddWS11CS133KD83", false),
+                FileStorageProvider = default,
+                ForceSynchronous = true
+            };
         }
 
         #endregion

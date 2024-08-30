@@ -8,7 +8,7 @@ namespace Baracuda.Serialization
     /// </summary>
     public interface IFileOperations
     {
-        public void Initialize(FileSystemArgs args = new());
+        public void Initialize(FileSystemSettings settings = new());
 
         public void Save();
 

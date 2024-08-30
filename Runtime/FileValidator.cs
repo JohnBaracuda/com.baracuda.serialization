@@ -16,13 +16,13 @@ namespace Baracuda.Serialization
         private readonly bool _skipFileEndingsArray;
         private readonly bool _logMissingFileExtensionWarning;
 
-        internal FileValidator(IFileSystemArgs args)
+        internal FileValidator(IFileSystemSettings settings)
         {
-            _extension = IsValidFileEnding(args.FileEnding) ? args.FileEnding : ".sav";
-            _skipFileEndingsArray = !args.EnforceFileEndings.Enabled;
-            _availableExtensions = args.EnforceFileEndings.ValueOrDefault(Array.Empty<string>());
+            _extension = IsValidFileEnding(settings.FileEnding) ? settings.FileEnding : ".sav";
+            _skipFileEndingsArray = !settings.EnforceFileEndings.Enabled;
+            _availableExtensions = settings.EnforceFileEndings.ValueOrDefault(Array.Empty<string>());
             ArrayUtility.Add(ref _availableExtensions, _extension);
-            _logMissingFileExtensionWarning = args.LogMissingFileExtensionWarning;
+            _logMissingFileExtensionWarning = settings.LogMissingFileExtensionWarning;
         }
 
 

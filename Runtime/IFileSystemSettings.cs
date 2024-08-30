@@ -2,7 +2,7 @@
 
 namespace Baracuda.Serialization
 {
-    public interface IFileSystemArgs
+    public interface IFileSystemSettings
     {
         string RootFolder { get; set; }
         bool AppendVersionToRootFolder { get; set; }

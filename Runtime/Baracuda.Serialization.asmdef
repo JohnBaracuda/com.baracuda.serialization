@@ -3,7 +3,8 @@
     "rootNamespace": "Baracuda.Serialization",
     "references": [
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "GUID:ebf14bd9950c0cb429d7280a2c7ab8fe"
+        "GUID:ebf14bd9950c0cb429d7280a2c7ab8fe",
+        "GUID:776d03a35f1b52c4a9aed9f56d7b4229"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

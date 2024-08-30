@@ -5,18 +5,16 @@ using System.IO;
 using Baracuda.Bedrock.Collections;
 using Baracuda.Bedrock.Types;
 using JetBrains.Annotations;
-using Sirenix.OdinInspector;
+using NaughtyAttributes;
 using UnityEngine;
 
 namespace Baracuda.Serialization
 {
     public abstract class SaveDataList<TValue> : SaveDataAsset, IList<TValue>, IReadOnlyList<TValue>
     {
-        [LabelText("Default Value")]
         [SerializeField] private List<TValue> defaultList;
         [NonSerialized] private readonly Broadcast<TValue> _addedEvent = new();
         [NonSerialized] private readonly Broadcast<TValue> _removedEvent = new();
-        [ShowInInspector]
         [NonSerialized] private List<TValue> _list;
 
 
@@ -100,7 +98,6 @@ namespace Baracuda.Serialization
         };
 
         [Button]
-        [PropertySpace(SpaceBefore = 0, SpaceAfter = 8)]
         private void OpenInFileSystem()
         {
             var dataPath = Application.persistentDataPath;
@@ -111,7 +108,6 @@ namespace Baracuda.Serialization
         }
 
         [Button("Reset")]
-        [ButtonGroup("Persistent")]
         public override void ResetPersistentData()
         {
             _list = new List<TValue>();

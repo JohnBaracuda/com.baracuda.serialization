@@ -3,7 +3,6 @@ using System.Diagnostics;
 using Baracuda.Bedrock.Attributes;
 using Baracuda.Bedrock.Utilities;
 using JetBrains.Annotations;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Baracuda.Serialization
@@ -12,7 +11,6 @@ namespace Baracuda.Serialization
     {
         [AssetGUID]
         [SerializeField] private string key;
-        [ListDrawerSettings(DefaultExpandedState = false)]
         [SerializeField] private string[] tags;
         [SerializeField] private StorageLevel storageLevel = StorageLevel.Profile;
 

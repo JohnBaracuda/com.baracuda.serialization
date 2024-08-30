@@ -6,7 +6,7 @@ namespace Baracuda.Serialization
 {
     public class MonoFileOperations : IFileOperations
     {
-        public void Initialize(FileSystemArgs args = new())
+        public void Initialize(FileSystemSettings settings = new())
         {
         }
 

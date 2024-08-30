@@ -136,14 +136,14 @@ namespace Baracuda.Serialization
 
         #region Initialize
 
-        public static UniTask InitializeAsync(IFileSystemArgs args = null)
+        public static UniTask InitializeAsync(IFileSystemSettings settings = null)
         {
-            return InitializeAsyncInternal(args);
+            return InitializeAsyncInternal(settings);
         }
 
-        public static void Initialize(IFileSystemArgs args = null)
+        public static void Initialize(IFileSystemSettings settings = null)
         {
-            InitializeInternal(args);
+            InitializeInternal(settings);
         }
 
         #endregion
