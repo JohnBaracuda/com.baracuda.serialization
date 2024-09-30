@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Baracuda.Bedrock.Types;
-using Baracuda.Bedrock.Utilities;
+using Baracuda.Utility.Types;
+using Baracuda.Utility.Utilities;
 using JetBrains.Annotations;
 using NaughtyAttributes;
 using UnityEngine;

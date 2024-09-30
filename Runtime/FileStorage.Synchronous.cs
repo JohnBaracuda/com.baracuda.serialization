@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Baracuda.Bedrock.Reflection;
+using Baracuda.Utility.Reflection;
 using UnityEngine.Assertions;
 
 namespace Baracuda.Serialization

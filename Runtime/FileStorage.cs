@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Baracuda.Bedrock.Collections;
-using Baracuda.Bedrock.Utilities;
+using Baracuda.Utility.Collections;
+using Baracuda.Utility.Utilities;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 

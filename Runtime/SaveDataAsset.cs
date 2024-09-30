@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using Baracuda.Bedrock.Attributes;
-using Baracuda.Bedrock.Utilities;
+using Baracuda.Utility.Attributes;
+using Baracuda.Utility.Utilities;
 using JetBrains.Annotations;
 using UnityEngine;
 

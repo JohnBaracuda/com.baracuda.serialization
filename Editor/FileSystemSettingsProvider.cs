@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using Baracuda.Utilities.Editor.Odin;
+using Baracuda.Utility.Editor.Drawer;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using GUIUtility = Baracuda.Utilities.Editor.Utilities.GUIUtility;
+using GUIUtility = Baracuda.Utility.Editor.Utilities.GUIUtility;
 
 namespace Baracuda.Serialization.Editor
 {

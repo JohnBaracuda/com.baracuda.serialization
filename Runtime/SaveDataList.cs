@@ -2,8 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using Baracuda.Bedrock.Collections;
-using Baracuda.Bedrock.Types;
+using Baracuda.Utility.Collections;
+using Baracuda.Utility.Types;
 using JetBrains.Annotations;
 using NaughtyAttributes;
 using UnityEngine;
