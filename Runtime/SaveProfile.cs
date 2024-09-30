@@ -177,11 +177,7 @@ namespace Baracuda.Serialization
             if (_loadedFileDataCache.TryGetValue(fileName, out var data))
             {
                 var saveData = data.Read<SaveData<T>>();
-                if (_loadedSaveDataCache.ContainsKey(fileName))
-                {
-                    Debug.LogError(fileName + " " + options.Tags.ToCollectionString(','));
-                }
-                _loadedSaveDataCache.Add(fileName, saveData);
+                _loadedSaveDataCache[fileName] = saveData;
                 _loadedFileDataCache.Remove(fileName);
                 var value = saveData.value;
                 return value;
@@ -209,7 +205,7 @@ namespace Baracuda.Serialization
                 var saveData = data.Read<SaveData<T>>();
                 if (saveData is not null)
                 {
-                    _loadedSaveDataCache.AddOrUpdate(fileName, saveData);
+                    _loadedSaveDataCache[fileName] = saveData;
                     _loadedFileDataCache.Remove(fileName);
                     value = saveData.value;
                     return true;
