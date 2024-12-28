@@ -23,9 +23,9 @@ namespace Baracuda.Serialization
 
         [SerializeField] private List<Header> files;
 
-        private Dictionary<string, SaveData> _loadedSaveDataCache;
-        private Dictionary<string, FileData> _loadedFileDataCache;
-        private HashSet<string> _dirtySaveDataKeys;
+        private readonly Dictionary<string, DataStorage> _loadedSaveDataCache;
+        private readonly Dictionary<string, FileData> _loadedFileDataCache;
+        private readonly HashSet<string> _dirtySaveDataKeys;
 
         private bool _isDirty;
 
@@ -49,7 +49,7 @@ namespace Baracuda.Serialization
 
         #region Save & Store File
 
-        public void SaveFile<T>([NotNull] string fileName, T value, StoreOptions options = default)
+        public void SaveFile<T>([NotNull] string fileName, T value, FileOptions options = default)
         {
             if (fileName.IsNullOrWhitespace())
             {
@@ -58,19 +58,19 @@ namespace Baracuda.Serialization
 
             FileSystem.Validator.SanitizeFileName(ref fileName);
 
-            SaveData<T> saveData;
+            DataStorage<T> dataStorage;
 
             if (_loadedSaveDataCache.TryGetValue(fileName, out var save))
             {
-                saveData = save as SaveData<T>;
-                if (saveData is not null)
+                dataStorage = save as DataStorage<T>;
+                if (dataStorage is not null)
                 {
-                    saveData.value = value;
-                    saveData.lastSaveTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture);
+                    dataStorage.value = value;
+                    dataStorage.lastSaveTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture);
                 }
                 else
                 {
-                    saveData = new SaveData<T>
+                    dataStorage = new DataStorage<T>
                     {
                         value = value
                     };
@@ -79,26 +79,26 @@ namespace Baracuda.Serialization
             }
             else
             {
-                saveData = new SaveData<T>
+                dataStorage = new DataStorage<T>
                 {
                     value = value,
                     fileName = fileName,
                     createdTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture),
                     lastSaveTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture),
-                    qualifiedType = typeof(SaveData<T>).AssemblyQualifiedName,
+                    qualifiedType = typeof(DataStorage<T>).AssemblyQualifiedName,
                     fileSystemVersion = FileSystem.Version,
                     applicationVersion = Application.version,
                     tags = options.Tags
                 };
-                _loadedSaveDataCache.Add(fileName, saveData);
+                _loadedSaveDataCache.Add(fileName, dataStorage);
             }
 
             var filePath = Path.Combine(profileFolderName, fileName);
-            FileSystem.Storage.Save(filePath, saveData);
+            FileSystem.Storage.Save(filePath, dataStorage);
             var header = new Header
             {
                 fileName = fileName,
-                qualifiedTypeName = typeof(SaveData<T>).AssemblyQualifiedName
+                qualifiedTypeName = typeof(DataStorage<T>).AssemblyQualifiedName
             };
             if (files.AddUnique(header))
             {
@@ -108,7 +108,7 @@ namespace Baracuda.Serialization
             }
         }
 
-        public void StoreFile<T>([NotNull] string fileName, T value, StoreOptions options = default)
+        public void StoreFile<T>([NotNull] string fileName, T value, FileOptions options = default)
         {
             if (fileName.IsNullOrWhitespace())
             {
@@ -116,15 +116,15 @@ namespace Baracuda.Serialization
             }
             FileSystem.Validator.SanitizeFileName(ref fileName);
 
-            SaveData<T> saveData;
+            DataStorage<T> dataStorage;
 
             if (_loadedSaveDataCache.TryGetValue(fileName, out var save))
             {
-                saveData = save as SaveData<T>;
-                if (saveData is not null)
+                dataStorage = save as DataStorage<T>;
+                if (dataStorage is not null)
                 {
-                    saveData.value = value;
-                    saveData.lastSaveTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture);
+                    dataStorage.value = value;
+                    dataStorage.lastSaveTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture);
                 }
                 else
                 {
@@ -133,18 +133,18 @@ namespace Baracuda.Serialization
             }
             else
             {
-                saveData = new SaveData<T>
+                dataStorage = new DataStorage<T>
                 {
                     value = value,
                     fileName = fileName,
                     lastSaveTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture),
                     createdTimeStamp = DateTime.Now.ToString(CultureInfo.InvariantCulture),
-                    qualifiedType = typeof(SaveData<T>).AssemblyQualifiedName,
+                    qualifiedType = typeof(DataStorage<T>).AssemblyQualifiedName,
                     fileSystemVersion = FileSystem.Version,
                     applicationVersion = Application.version,
                     tags = options.Tags
                 };
-                _loadedSaveDataCache.Add(fileName, saveData);
+                _loadedSaveDataCache.Add(fileName, dataStorage);
             }
 
             _dirtySaveDataKeys.Add(fileName);
@@ -152,7 +152,7 @@ namespace Baracuda.Serialization
             var header = new Header
             {
                 fileName = fileName,
-                qualifiedTypeName = typeof(SaveData<T>).AssemblyQualifiedName
+                qualifiedTypeName = typeof(DataStorage<T>).AssemblyQualifiedName
             };
             if (files.AddUnique(header))
             {
@@ -166,7 +166,7 @@ namespace Baracuda.Serialization
 
         #region Load File
 
-        public T LoadFile<T>([NotNull] string fileName, StoreOptions options = default)
+        public T LoadFile<T>([NotNull] string fileName, FileOptions options = default)
         {
             if (fileName.IsNullOrWhitespace())
             {
@@ -176,7 +176,7 @@ namespace Baracuda.Serialization
 
             if (_loadedFileDataCache.TryGetValue(fileName, out var data))
             {
-                var saveData = data.Read<SaveData<T>>();
+                var saveData = data.Read<DataStorage<T>>();
                 _loadedSaveDataCache[fileName] = saveData;
                 _loadedFileDataCache.Remove(fileName);
                 var value = saveData.value;
@@ -185,14 +185,14 @@ namespace Baracuda.Serialization
 
             if (_loadedSaveDataCache.TryGetValue(fileName, out var file))
             {
-                var value = file is SaveData<T> save ? save.value : default;
+                var value = file is DataStorage<T> save ? save.value : default;
                 return value;
             }
 
             return default;
         }
 
-        public bool TryLoadFile<T>([NotNull] string fileName, out T value, StoreOptions options = default)
+        public bool TryLoadFile<T>([NotNull] string fileName, out T value, FileOptions options = default)
         {
             if (fileName.IsNullOrWhitespace())
             {
@@ -202,7 +202,7 @@ namespace Baracuda.Serialization
 
             if (_loadedFileDataCache.TryGetValue(fileName, out var data))
             {
-                var saveData = data.Read<SaveData<T>>();
+                var saveData = data.Read<DataStorage<T>>();
                 if (saveData is not null)
                 {
                     _loadedSaveDataCache[fileName] = saveData;
@@ -214,7 +214,7 @@ namespace Baracuda.Serialization
 
             if (_loadedSaveDataCache.TryGetValue(fileName, out var file))
             {
-                if (file is SaveData<T> save)
+                if (file is DataStorage<T> save)
                 {
                     value = save.value;
                     return true;
@@ -308,10 +308,10 @@ namespace Baracuda.Serialization
 
                 var filePath = Path.Combine(profileFolderName, header.fileName);
                 var type = Type.GetType(header.qualifiedTypeName);
-                if (type != null && type.GetGenericTypeDefinition() == typeof(SaveData<>))
+                if (type != null && type.GetGenericTypeDefinition() == typeof(DataStorage<>))
                 {
                     var typedFileData = await FileSystem.Storage.LoadAsync(filePath, type);
-                    _loadedSaveDataCache.AddOrUpdate(header.fileName, (SaveData)typedFileData.Read());
+                    _loadedSaveDataCache.AddOrUpdate(header.fileName, (DataStorage)typedFileData.Read());
                 }
                 else
                 {
@@ -337,10 +337,10 @@ namespace Baracuda.Serialization
 
                 var filePath = Path.Combine(profileFolderName, header.fileName);
                 var type = Type.GetType(header.qualifiedTypeName);
-                if (type != null && type.GetGenericTypeDefinition() == typeof(SaveData<>))
+                if (type != null && type.GetGenericTypeDefinition() == typeof(DataStorage<>))
                 {
                     var typedFileData = FileSystem.Storage.Load(filePath, type);
-                    _loadedSaveDataCache.AddOrUpdate(header.fileName, (SaveData)typedFileData.Read());
+                    _loadedSaveDataCache.AddOrUpdate(header.fileName, (DataStorage)typedFileData.Read());
                 }
                 else
                 {
@@ -381,7 +381,7 @@ namespace Baracuda.Serialization
 
         private SaveProfile()
         {
-            _loadedSaveDataCache = new Dictionary<string, SaveData>();
+            _loadedSaveDataCache = new Dictionary<string, DataStorage>();
             _loadedFileDataCache = new Dictionary<string, FileData>();
             _dirtySaveDataKeys = new HashSet<string>();
             files = new List<Header>();

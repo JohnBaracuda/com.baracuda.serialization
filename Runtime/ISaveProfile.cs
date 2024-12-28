@@ -12,22 +12,22 @@ namespace Baracuda.Serialization
         /// <summary>
         ///     Store and save a file to the profile.
         /// </summary>
-        public void SaveFile<T>([NotNull] string fileName, T value, StoreOptions options = default);
+        public void SaveFile<T>([NotNull] string fileName, T value, FileOptions options = default);
 
         /// <summary>
         ///     Store the file to the profile but don't save it yet.
         /// </summary>
-        public void StoreFile<T>([NotNull] string fileName, T value, StoreOptions options = default);
+        public void StoreFile<T>([NotNull] string fileName, T value, FileOptions options = default);
 
         /// <summary>
         ///     Load the file from the file profile.
         /// </summary>
-        public T LoadFile<T>([NotNull] string fileName, StoreOptions options = default);
+        public T LoadFile<T>([NotNull] string fileName, FileOptions options = default);
 
         /// <summary>
         ///     Try to load the file from the file profile.
         /// </summary>
-        public bool TryLoadFile<T>([NotNull] string fileName, out T value, StoreOptions options = default);
+        public bool TryLoadFile<T>([NotNull] string fileName, out T value, FileOptions options = default);
 
         /// <summary>
         ///     Returns true if the profile has value for the file;

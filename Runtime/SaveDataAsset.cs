@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Baracuda.Utility.Attributes;
 using Baracuda.Utility.Utilities;
 using JetBrains.Annotations;
@@ -11,27 +10,18 @@ namespace Baracuda.Serialization
     {
         [AssetGUID]
         [SerializeField] private string key;
-        [SerializeField] private string[] tags;
         [SerializeField] private StorageLevel storageLevel = StorageLevel.Profile;
 
         [PublicAPI]
         public string Key => key;
 
         [PublicAPI]
-        public string[] Tags => tags;
-
-        [PublicAPI]
         public StorageLevel StorageLevel => storageLevel;
-
-        public abstract void ResetPersistentData();
 
         [Conditional("UNITY_EDITOR")]
         protected void UpdateSaveDataKey()
         {
 #if UNITY_EDITOR
-            tags ??= Array.Empty<string>();
-            ArrayUtility.AddUnique(ref tags, name);
-
             if (key.IsNullOrWhitespace())
             {
                 var path = UnityEditor.AssetDatabase.GetAssetPath(this);

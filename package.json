@@ -1,6 +1,6 @@
 {
   "name": "com.baracuda.serialization",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "displayName": "Serialization",
   "description": "Profile based multi platform serialization and savegame system.",
   "unity": "2022.3",

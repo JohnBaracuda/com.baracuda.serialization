@@ -64,7 +64,7 @@ namespace Baracuda.Serialization
 
         #region Ctor
 
-        public FileHeader(string name, Type type, StoreOptions options)
+        public FileHeader(string name, Type type, FileOptions options)
         {
             fileName = name;
             fileType = type.AssemblyQualifiedName;
@@ -88,7 +88,7 @@ namespace Baracuda.Serialization
             }
         }
 
-        public void Update(StoreOptions options)
+        public void Update(FileOptions options)
         {
             encrypted = options.Encryption.ValueOrDefault();
             tags = options.Tags;

@@ -46,9 +46,12 @@ namespace Baracuda.Serialization
         /// </summary>
         /// <exception cref="FileSystemNotInitializedException"></exception>
         [PublicAPI]
-        public static ISaveProfile SharedProfile => IsInitialized
+        public static ISaveProfile PersistentProfile => IsInitialized
             ? sharedProfile
-            : throw new FileSystemNotInitializedException(nameof(SharedProfile));
+            : throw new FileSystemNotInitializedException(nameof(PersistentProfile));
+
+        [Obsolete("Use PersistentProfile instead!")]
+        public static ISaveProfile SharedProfile => PersistentProfile;
 
         /// <summary>
         ///     List of available profiles that can be loaded.
@@ -57,7 +60,7 @@ namespace Baracuda.Serialization
         [PublicAPI]
         public static IReadOnlyCollection<ISaveProfile> Profiles => IsInitialized
             ? profileCache.Values
-            : throw new FileSystemNotInitializedException(nameof(SharedProfile));
+            : throw new FileSystemNotInitializedException(nameof(Profiles));
 
         /// <summary>
         ///     The <see cref="FileSystemState" /> of the file system.

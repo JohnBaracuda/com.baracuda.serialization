@@ -1,203 +1,361 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using Baracuda.Utility.Collections;
-using Baracuda.Utility.Types;
+using Baracuda.Utility.Utilities;
 using JetBrains.Annotations;
-using NaughtyAttributes;
-using UnityEngine;
 
 namespace Baracuda.Serialization
 {
-    public abstract class SaveDataList<TValue> : SaveDataAsset, IList<TValue>, IReadOnlyList<TValue>
+    public class SaveDataList<T> : IList<T>, IReadOnlyList<T>
     {
-        [SerializeField] private List<TValue> defaultList;
-        [NonSerialized] private readonly Broadcast<TValue> _addedEvent = new();
-        [NonSerialized] private readonly Broadcast<TValue> _removedEvent = new();
-        [NonSerialized] private List<TValue> _list;
-
-
-        #region Events
+        #region Public API
 
         [PublicAPI]
-        public event Action<TValue> Added
+        public FileOptions FileOptions { get; }
+
+        [PublicAPI]
+        public SaveDataKey Key { get; }
+
+        [PublicAPI]
+        public bool IsCreated { get; }
+
+        [PublicAPI]
+        public ISaveProfile Profile => _profile();
+
+        [PublicAPI]
+        public void Add(T value)
         {
-            add => _addedEvent.AddListener(value);
-            remove => _addedEvent.RemoveListener(value);
+            AddInternal(value);
         }
 
         [PublicAPI]
-        public event Action<TValue> Removed
+        public bool Remove(T value)
         {
-            add => _removedEvent.AddListener(value);
-            remove => _removedEvent.RemoveListener(value);
+            return RemoveInternal(value);
+        }
+
+        [PublicAPI]
+        public void Clear()
+        {
+            ClearInternal();
+        }
+
+        [PublicAPI]
+        public bool Contains(T item)
+        {
+            return ContainsInternal(item);
+        }
+
+        [PublicAPI]
+        public void AddUnique(T value)
+        {
+            AddUniqueInternal(value);
+        }
+
+        [PublicAPI]
+        public int IndexOf(T item)
+        {
+            return IndexOfInternal(item);
+        }
+
+        [PublicAPI]
+        public void Insert(int index, T item)
+        {
+            InsertInternal(index, item);
+        }
+
+        [PublicAPI]
+        public void RemoveAt(int index)
+        {
+            RemoveAtInternal(index);
+        }
+
+        [PublicAPI]
+        public T this[int index]
+        {
+            get => GetInternal(index);
+            set => SetInternal(index, value);
+        }
+
+        [PublicAPI]
+        public int Count => GetCountInternal();
+
+        [PublicAPI]
+        public bool IsReadOnly => GetIsReadOnlyInternal();
+
+        [PublicAPI]
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            CopyToInternal(array, arrayIndex);
+        }
+
+        [PublicAPI]
+        public IEnumerator<T> GetEnumerator()
+        {
+            return GetEnumeratorInternal();
+        }
+
+        [PublicAPI]
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumeratorInternal();
         }
 
         #endregion
 
 
-        #region Map Access
+        #region Builder
 
-        public void Add(TValue value)
+        [MustUseReturnValue]
+        public static Builder WithKey(SaveDataKey key)
         {
-            _list.Add(value);
-            _addedEvent.Raise(value);
-            Profile.SaveFile(Key, _list);
-        }
-
-        public void Clear()
-        {
-            _list.Clear();
-            Profile.SaveFile(Key, _list);
-        }
-
-        public void AddUnique(TValue value)
-        {
-            if (_list.AddUnique(value))
+            return new Builder
             {
-                _addedEvent.Raise(value);
-                Profile.SaveFile(Key, _list);
+                Key = key
+            };
+        }
+
+        [PublicAPI]
+        public SaveDataList(SaveDataKey key, Func<ISaveProfile> profile, FileOptions options, List<T> defaultList)
+        {
+            FileOptions = options;
+            Key = key;
+            IsCreated = true;
+            _defaultList = defaultList;
+            _profile = profile;
+            LoadOnDemand();
+        }
+
+        private bool _isLoaded;
+
+        private bool LoadOnDemand()
+        {
+            if (FileSystem.IsInitialized is false)
+            {
+                return false;
+            }
+            if (_isLoaded)
+            {
+                return true;
+            }
+            _list.AddRange(Profile.TryLoadFile<List<T>>(Key, out var data) ? data : _defaultList);
+            _isLoaded = true;
+            return true;
+        }
+
+        public ref struct Builder
+        {
+            public SaveDataKey Key;
+            private Func<ISaveProfile> _profile;
+            private List<T> _default;
+            private string[] _tags;
+
+            [MustUseReturnValue]
+            public Builder WithProfile(Func<ISaveProfile> profile)
+            {
+                _profile = profile;
+                return this;
+            }
+
+            [MustUseReturnValue]
+            public Builder WithSharedProfile()
+            {
+                _profile = () => FileSystem.PersistentProfile;
+                return this;
+            }
+
+            [MustUseReturnValue]
+            public Builder WithTags(params string[] tags)
+            {
+                ArrayUtility.Add(ref _tags, tags);
+                return this;
+            }
+
+            [MustUseReturnValue]
+            public Builder WithAlias(string alias)
+            {
+                ArrayUtility.Add(ref _tags, alias);
+                return this;
+            }
+
+            [MustUseReturnValue]
+            public Builder WithDefaultValue(List<T> @default)
+            {
+                _default = @default;
+                return this;
+            }
+
+            [MustUseReturnValue]
+            public Builder WithDefaultValue(params T[] defaultValues)
+            {
+                _default = new List<T>(defaultValues);
+                return this;
+            }
+
+            [MustUseReturnValue]
+            public readonly SaveDataList<T> Build()
+            {
+                var profile = _profile ?? (() => FileSystem.Profile);
+                var defaultList = _default ?? new List<T>();
+                var saveData = new SaveDataList<T>(Key, profile, new FileOptions(_tags), defaultList);
+                return saveData;
+            }
+
+            public static implicit operator SaveDataList<T>(Builder builder)
+            {
+                return builder.Build();
             }
         }
 
-        public void CopyTo(TValue[] array, int arrayIndex)
+        #endregion
+
+
+        #region Implementation
+
+        private readonly ObservableList<T> _list = new();
+        private readonly List<T> _defaultList;
+        private readonly Func<ISaveProfile> _profile;
+
+        private void AddInternal(T value)
         {
-            _list.CopyTo(array, arrayIndex);
+            if (!LoadOnDemand())
+            {
+                throw new Exception("Data is not loaded!");
+            }
+            _list.Add(value);
+            Profile.SaveFile(Key, _list.GetInternalList());
         }
 
-        public bool Remove(TValue item)
+        private bool RemoveInternal(T value)
         {
-            if (_list.Remove(item))
+            if (!LoadOnDemand())
             {
-                _removedEvent.Raise(item);
-                Profile.SaveFile(Key, _list);
+                throw new Exception("Data is not loaded!");
+            }
+            if (_list.Remove(value))
+            {
+                Profile.SaveFile(Key, _list.GetInternalList());
                 return true;
             }
             return false;
         }
 
-        public int Count => _list.Count;
-        public bool IsReadOnly => false;
-
-        public bool Contains(TValue value)
+        private void ClearInternal()
         {
-            return _list.Contains(value);
+            if (!LoadOnDemand())
+            {
+                throw new Exception("Data is not loaded!");
+            }
+
+            _list.Clear();
         }
 
-        #endregion
-
-
-        #region Persistent Data
-
-        private ISaveProfile Profile => StorageLevel switch
+        private bool ContainsInternal(T item)
         {
-            StorageLevel.Profile => FileSystem.Profile,
-            StorageLevel.SharedProfile => FileSystem.SharedProfile,
-            var _ => throw new ArgumentOutOfRangeException()
-        };
+            if (!LoadOnDemand())
+            {
+                throw new Exception("Data is not loaded!");
+            }
 
-        [Button]
-        private void OpenInFileSystem()
-        {
-            var dataPath = Application.persistentDataPath;
-            var systemPath = FileSystem.RootFolder;
-            var profilePath = Profile.Info.FolderName;
-            var folderPath = Path.Combine(dataPath, systemPath, profilePath);
-            Application.OpenURL(folderPath);
+            return _list.Contains(item);
         }
 
-        [Button("Reset")]
-        public override void ResetPersistentData()
+        private void AddUniqueInternal(T value)
         {
-            _list = new List<TValue>();
-            foreach (var value in defaultList)
+            if (!LoadOnDemand())
+            {
+                Debug.LogError("Data is not loaded!");
+                return;
+            }
+
+            if (!_list.Contains(value))
             {
                 _list.Add(value);
             }
-            Profile.SaveFile(Key, _list);
         }
 
-        #endregion
-
-
-        #region Initialization
-
-        private void OnEnable()
+        private int IndexOfInternal(T item)
         {
-            FileSystem.InitializationCompleted -= OnFileSystemInitialized;
-            FileSystem.InitializationCompleted += OnFileSystemInitialized;
-
-            if (FileSystem.IsInitialized)
+            if (!LoadOnDemand())
             {
-                OnFileSystemInitialized();
+                throw new Exception("Data is not loaded!");
             }
-        }
-
-        private void OnFileSystemInitialized()
-        {
-            UpdateSaveDataKey();
-            if (Profile.HasFile(Key) is false)
-            {
-                _list = new List<TValue>();
-                foreach (var value in defaultList)
-                {
-                    _list.Add(value);
-                }
-                Profile.SaveFile(Key, _list);
-            }
-            else
-            {
-                _list = Profile.LoadFile<List<TValue>>(Key);
-            }
-        }
-
-        private void OnDisable()
-        {
-            FileSystem.InitializationCompleted -= OnFileSystemInitialized;
-        }
-
-        #endregion
-
-
-        public IEnumerator<TValue> GetEnumerator()
-        {
-            return _list.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public int IndexOf(TValue item)
-        {
             return _list.IndexOf(item);
         }
 
-        public void Insert(int index, TValue item)
+        private void InsertInternal(int index, T item)
         {
-            _list.Insert(index, item);
-            _addedEvent.Raise(item);
-            Profile.SaveFile(Key, _list);
-        }
-
-        public void RemoveAt(int index)
-        {
-            var item = _list[index];
-            _list.RemoveAt(index);
-            _removedEvent.Raise(item);
-            Profile.SaveFile(Key, _list);
-        }
-
-        public TValue this[int index]
-        {
-            get => _list[index];
-            set
+            if (!LoadOnDemand())
             {
-                _list[index] = value;
-                Profile.SaveFile(Key, _list);
+                throw new Exception("Data is not loaded!");
             }
+            _list.Insert(index, item);
         }
+
+        private void RemoveAtInternal(int index)
+        {
+            if (!LoadOnDemand())
+            {
+                throw new Exception("Data is not loaded!");
+            }
+            _list.RemoveAt(index);
+        }
+
+        private T GetInternal(int index)
+        {
+            if (!LoadOnDemand())
+            {
+                throw new Exception("Data is not loaded!");
+            }
+            return _list[index];
+        }
+
+        private void SetInternal(int index, T value)
+        {
+            if (!LoadOnDemand())
+            {
+                throw new Exception("Data is not loaded!");
+            }
+            _list[index] = value;
+        }
+
+        private int GetCountInternal()
+        {
+            if (!LoadOnDemand())
+            {
+                throw new Exception("Data is not loaded!");
+            }
+            return _list.Count;
+        }
+
+        private bool GetIsReadOnlyInternal()
+        {
+            if (!LoadOnDemand())
+            {
+                throw new Exception("Data is not loaded!");
+            }
+            return false;
+        }
+
+        private void CopyToInternal(T[] array, int arrayIndex)
+        {
+            if (!LoadOnDemand())
+            {
+                throw new Exception("Data is not loaded!");
+            }
+            _list.CopyTo(array, arrayIndex);
+        }
+
+        private IEnumerator<T> GetEnumeratorInternal()
+        {
+            if (!LoadOnDemand())
+            {
+                throw new Exception("Data is not loaded!");
+            }
+            return _list.GetEnumerator();
+        }
+
+        #endregion
     }
 }

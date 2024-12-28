@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Baracuda.Serialization
 {
-    public abstract class SaveDataMap<TKey, TValue> : SaveDataAsset
+    public abstract class SaveDataMapObsolete<TKey, TValue> : SaveDataAsset
     {
         [SerializeField] private Map<TKey, TValue> defaultMap;
         [NonSerialized] private readonly Broadcast<KeyValuePair<TKey, TValue>> _changedEvent = new();
@@ -75,7 +75,7 @@ namespace Baracuda.Serialization
         private ISaveProfile Profile => StorageLevel switch
         {
             StorageLevel.Profile => FileSystem.Profile,
-            StorageLevel.SharedProfile => FileSystem.SharedProfile,
+            StorageLevel.SharedProfile => FileSystem.PersistentProfile,
             var _ => throw new ArgumentOutOfRangeException()
         };
 
@@ -90,7 +90,7 @@ namespace Baracuda.Serialization
         }
 
         [Button("Reset")]
-        public override void ResetPersistentData()
+        public void ResetPersistentData()
         {
             _map = new Map<TKey, TValue>();
             foreach (var (key, value) in defaultMap)

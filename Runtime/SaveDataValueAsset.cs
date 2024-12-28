@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using Baracuda.Utility.Types;
-using Baracuda.Utility.Utilities;
 using JetBrains.Annotations;
 using NaughtyAttributes;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Serialization;
 
 namespace Baracuda.Serialization
@@ -15,9 +11,7 @@ namespace Baracuda.Serialization
     {
         [FormerlySerializedAs("defaultPersistentValue")]
         [SerializeField] private TValue defaultValue;
-        [NonSerialized] private readonly Broadcast<TValue> _changedEvent = new();
-        [NonSerialized] private TValue _cachedValue;
-        [NonSerialized] private bool _isValueCached;
+        [NonSerialized] private SaveData<TValue> _saveData;
 
         [PublicAPI]
         [ShowNativeProperty]
@@ -30,50 +24,20 @@ namespace Baracuda.Serialization
         [PublicAPI]
         public void SetValue(TValue value)
         {
-            if (FileSystem.IsInitialized is false)
-            {
-                return;
-            }
-
-            Assert.IsFalse(Key.IsNullOrWhitespace(), $"Save data asset key of {name} is not set!");
-            if (EqualityComparer<TValue>.Default.Equals(value, GetValue()))
-            {
-                return;
-            }
-            _cachedValue = value;
-            _isValueCached = true;
-            Profile.SaveFile(Key, value, new StoreOptions(Tags));
-            _changedEvent.Raise(value);
+            _saveData.SetValue(value);
         }
 
         [PublicAPI]
         public TValue GetValue()
         {
-            if (FileSystem.IsInitialized is false)
-            {
-                return defaultValue;
-            }
-
-            Assert.IsFalse(Key.IsNullOrWhitespace(), $"Save data asset key of {name} is not set!");
-            if (_isValueCached)
-            {
-                return _cachedValue;
-            }
-            _cachedValue = Profile.LoadFile<TValue>(Key, new StoreOptions(Tags));
-            return _cachedValue;
+            return _saveData.GetValue();
         }
 
         [PublicAPI]
         public event Action<TValue> Changed
         {
-            add => _changedEvent.AddListener(value);
-            remove => _changedEvent.RemoveListener(value);
-        }
-
-        [PublicAPI]
-        public void SetValueDirty()
-        {
-            SetValue(_isValueCached ? _cachedValue : Value);
+            add => _saveData.ObservableValue.AddListener(value);
+            remove => _saveData.ObservableValue.RemoveListener(value);
         }
 
 
@@ -82,7 +46,7 @@ namespace Baracuda.Serialization
         private ISaveProfile Profile => StorageLevel switch
         {
             StorageLevel.Profile => FileSystem.Profile,
-            StorageLevel.SharedProfile => FileSystem.SharedProfile,
+            StorageLevel.SharedProfile => FileSystem.PersistentProfile,
             var _ => throw new ArgumentOutOfRangeException()
         };
 
@@ -94,13 +58,6 @@ namespace Baracuda.Serialization
             var profilePath = Profile.Info.FolderName;
             var folderPath = Path.Combine(dataPath, systemPath, profilePath);
             Application.OpenURL(folderPath);
-        }
-
-        [Button("Reset")]
-        public override void ResetPersistentData()
-        {
-            Value = defaultValue;
-            _changedEvent.Raise(Value);
         }
 
         #endregion
@@ -122,18 +79,11 @@ namespace Baracuda.Serialization
 
         private void OnFileSystemInitialized()
         {
-            if (Profile.HasFile(Key) is false)
-            {
-                _cachedValue = defaultValue;
-                _isValueCached = true;
-            }
-            else
-            {
-                _cachedValue = Profile.LoadFile<TValue>(Key);
-                _isValueCached = true;
-            }
-
-            _changedEvent.Raise(Value);
+            _saveData ??= SaveData<TValue>.WithKey(Key)
+                .WithAlias(name)
+                .WithDefaultValue(defaultValue)
+                .WithProfile(() => Profile)
+                .Build();
         }
 
         #endregion
